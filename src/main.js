@@ -1415,15 +1415,17 @@ function renderExplore(page) {
         <p>${page.subtitle}</p>
       </div>
     </section>
-      <div class="explore-toolbar">
-        <div class="explore-filter-group" aria-label="Filter Explore by chain">
-          ${exploreFilterButton('chain', 'all', 'All chains', exploreFilterChain)}
-        ${EULER_CHAINS.map((chain) => exploreFilterButton('chain', chain.id, chain.shortLabel, exploreFilterChain)).join('')}
-        </div>
-      <div class="explore-filter-group" aria-label="Filter Explore by page type">
-        ${exploreFilterButton('type', 'all', 'All markets', exploreFilterType)}
-        ${exploreFilterButton('type', 'earn', 'Earn Vaults', exploreFilterType)}
-        ${exploreFilterButton('type', 'market', 'Lending Markets', exploreFilterType)}
+    <div class="explore-toolbar">
+      <label class="explore-search">
+        <span>⌕</span>
+        <input placeholder="Search by asset, market, curator..." aria-label="Search by asset, market, curator" />
+      </label>
+      <div class="explore-filter-group" aria-label="Filter Explore">
+        ${exploreFilterButton('type', 'all', 'Active', exploreFilterType)}
+        ${exploreFilterButton('chain', 'all', 'Risk manager', exploreFilterChain)}
+        ${exploreFilterButton('type', 'market', 'Market', exploreFilterType)}
+        ${exploreFilterButton('type', 'earn', 'Asset', exploreFilterType)}
+        <button type="button" disabled>+ Add filter</button>
       </div>
     </div>
     <section class="explore-list">
@@ -1480,7 +1482,7 @@ function renderPortfolio(page) {
     </div>
     <div class="portfolio-tabs">
       <button class="active">Positions <b>${positions.length}</b></button>
-      <button>Savings <b>${PAGES.filter((item) => item.type === 'earn').length}</b></button>
+      <button>Deposits <b>${PAGES.filter((item) => item.type === 'earn').length}</b></button>
       <button>Rewards <b>0</b></button>
     </div>
     <section class="portfolio-section">
@@ -2143,10 +2145,68 @@ function renderMarket(page) {
             </div>
           </div>
         `)}
+        ${renderCard('Statistics', `
+          <div class="stat-list">
+            ${metric('Total supply', pageTokenValueMetric(page, 'debtTotalSupply', contractValue(page, 'debtPrice') || '$1.00', '$0'))}
+            ${metric('Total borrowed', pageTokenValueMetric(page, 'totalBorrows', contractValue(page, 'debtPrice') || '$1.00', '$0'))}
+            ${metric('Available liquidity', pageTokenValueMetric(page, 'availableLiquidity', contractValue(page, 'debtPrice') || '$1.00', '$0'))}
+            ${metric(infoLabel('Supply APY', 'supply-apy'), contractValue(page, 'debtSupplyApy') || contractValue(page, 'supplyApy'))}
+            ${metric(infoLabel('Borrow APY', 'borrow-apy'), contractValue(page, 'borrowApy'))}
+            ${metric('Utilization', contractValue(page, 'utilization') || '0.00%')}
+          </div>
+        `)}
+        ${renderCard('Risk parameters', `
+          <div class="stat-list">
+            ${metric('Liquidation bonus', '0-15%')}
+            ${metric('Supply cap', contractValue(page, 'supplyCap') || '∞')}
+            ${metric('Borrow cap', contractValue(page, 'borrowCap') || '∞')}
+            ${metric('Share token exchange rate', contractValue(page, 'shareTokenExchangeRate') || '1.00')}
+            ${metric('Bad debt socialisation', 'Yes')}
+            ${metric('Interest fee', contractValue(page, 'interestFee'))}
+            ${metric('Disabled operations', 'None')}
+          </div>
+        `)}
+        ${renderCard('Collateral exposure', `
+          <p class="section-copy">Deposits in this vault can be borrowed. Please make sure you're comfortable accepting the collaterals listed in the table below before supplying.</p>
+          <div class="exposure-list">
+            <div class="exposure-row">
+              <div class="exposure-head">
+                <div>${assetIcon(page.collateral, 'gold')}<span><small>${page.subtitle}</small><strong>${page.collateral}</strong></span></div>
+              </div>
+              <div class="exposure-metrics">
+                ${metric('Max LTV', contractValue(page, 'maxLtv'))}
+                ${metric('Liquidation LTV', contractValue(page, 'liquidationLtv'))}
+              </div>
+            </div>
+          </div>
+        `)}
+        ${renderCard('Interest rate model', `
+          ${renderIrmChart(page)}
+          <div class="stat-list">
+            ${metric('Base rate', contractValue(page, 'irmBaseRate'))}
+            ${metric('Rate at kink', contractValue(page, 'irmRateAtKink'))}
+            ${metric('Max rate', contractValue(page, 'irmMaxRate'))}
+            ${metric('Kink', contractValue(page, 'irmKink'))}
+          </div>
+        `)}
+        ${renderCard('Addresses', `
+          <div class="stat-list">
+            ${metric(`${page.debt} token`, contractValue(page, 'debtAssetAddress') ? addressLink(page, contractValue(page, 'debtAssetAddress')) : 'Pending')}
+            ${metric(`${page.debt} vault`, addressLink(page, page.debtVaultAddress || page.contractAddress))}
+            ${metric(`${page.debt} debt`, addressLink(page, page.debtVaultAddress || page.contractAddress))}
+            ${metric('Risk manager', addressLink(page, page.routerAddress))}
+            ${metric('Fee receiver', contractValue(page, 'feeReceiver') ? addressLink(page, contractValue(page, 'feeReceiver')) : 'Pending')}
+            ${metric('Oracle router', contractValue(page, 'oracleRouter') ? addressLink(page, contractValue(page, 'oracleRouter')) : addressLink(page, page.routerAddress))}
+            ${metric('Unit of account', contractValue(page, 'unitOfAccount') ? addressLink(page, contractValue(page, 'unitOfAccount')) : 'Pending')}
+            ${metric('Interest rate model', contractValue(page, 'interestRateModel') ? addressLink(page, contractValue(page, 'interestRateModel')) : addressLink(page, page.irmAddress))}
+            ${metric('Hook target', contractValue(page, 'hookTarget') && contractValue(page, 'hookTarget') !== '0x0000000000000000000000000000000000000000' ? addressLink(page, contractValue(page, 'hookTarget')) : 'None')}
+          </div>
+        `)}
       </div>
       <aside class="action-panel">
         <div class="tabs action-tabs">
           <button class="active">Borrow</button>
+          <button class="disabled-action-tab" disabled>Multiply</button>
         </div>
         <div class="field-card">
           <div class="field-top"><span>Supply ${page.collateral}</span><span>${page.subtitle}</span></div>

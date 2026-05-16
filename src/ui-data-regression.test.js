@@ -75,6 +75,31 @@ test('wallet header keeps the original pill format instead of adding a custom me
   assert.equal(mainSource.includes('class="pill address"'), true);
 });
 
+test('market pair detail page includes Euler-style information sections', () => {
+  const marketStart = mainSource.indexOf('function renderMarket(page)');
+  const marketEnd = mainSource.indexOf('function renderEarn(page)');
+  const renderMarketSource = mainSource.slice(marketStart, marketEnd);
+  for (const label of ['Statistics', 'Risk parameters', 'Collateral exposure', 'Interest rate model', 'Addresses']) {
+    assert.equal(renderMarketSource.includes(`renderCard('${label}'`), true, `${label} card missing from pair page`);
+  }
+  assert.equal(renderMarketSource.includes('button class="disabled-action-tab" disabled'), true);
+});
+
+test('explore page keeps Euler-style search and filter labels', () => {
+  assert.equal(mainSource.includes('placeholder="Search by asset, market, curator..."'), true);
+  for (const label of ['Active', 'Risk manager', 'Market', 'Asset', 'Add filter']) {
+    assert.equal(mainSource.includes(label), true, `${label} filter missing`);
+  }
+});
+
+test('portfolio tabs use Euler naming for deposits instead of savings', () => {
+  const portfolioStart = mainSource.indexOf('function renderPortfolio(page)');
+  const portfolioEnd = mainSource.indexOf('function selectedPositionForMarket');
+  const renderPortfolioSource = mainSource.slice(portfolioStart, portfolioEnd);
+  assert.equal(renderPortfolioSource.includes('Deposits'), true);
+  assert.equal(renderPortfolioSource.includes('Savings'), false);
+});
+
 test('wallet cache can be reset after disconnect or account changes', () => {
   assert.equal(eulerLiveSource.includes('export function resetWalletConnectionCache()'), true);
   assert.equal(eulerLiveSource.includes('export async function requestWalletAccount'), true);

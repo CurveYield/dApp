@@ -1098,12 +1098,18 @@ button {
   min-width: 0;
 }
 
+.wallet-menu {
+  position: relative;
+  min-width: 0;
+}
+
 .nav-menu summary {
   list-style: none;
 }
 
 .nav-menu summary::-webkit-details-marker,
-.chain-select summary::-webkit-details-marker {
+.chain-select summary::-webkit-details-marker,
+.wallet-menu summary::-webkit-details-marker {
   display: none;
 }
 
@@ -1227,6 +1233,21 @@ button {
 .chain-select[open] .chain-menu {
   display: grid;
   gap: 4px;
+}
+
+.wallet-menu[open] .wallet-menu-panel {
+  display: grid;
+  gap: 4px;
+  width: min(320px, calc(100vw - 24px));
+}
+
+.wallet-current {
+  display: block;
+  overflow-wrap: anywhere;
+  padding: 8px 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .chain-option {

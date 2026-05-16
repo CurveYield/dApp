@@ -913,6 +913,33 @@ export async function getConnectedWalletAccount() {
   return accounts?.[0] || '';
 }
 
+export function resetWalletConnectionCache() {
+  walletAccountRequest = null;
+  walletAccountRequested = false;
+  cachedWalletAccount = null;
+  walletNetworkRequest = null;
+  walletNetworkRequestChain = null;
+}
+
+export async function requestWalletAccount({ forcePermission = false } = {}) {
+  if (!window.ethereum) throw new Error('No wallet found.');
+  if (forcePermission && window.ethereum.request) {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_requestPermissions',
+        params: [{ eth_accounts: {} }],
+      });
+    } catch (error) {
+      if (!/wallet_requestPermissions|unsupported|does not exist/i.test(error?.message || '')) throw error;
+    }
+  }
+  const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+  cachedWalletAccount = accounts?.[0] || null;
+  walletAccountRequested = Boolean(cachedWalletAccount);
+  if (!cachedWalletAccount) throw new Error('Wallet did not return an account.');
+  return cachedWalletAccount;
+}
+
 export async function readTokenBalance(token, owner, chainId = 'arbitrum') {
   assertConfiguredAddress(token, 'Token');
   assertConfiguredAddress(owner, 'Owner');

@@ -55,3 +55,18 @@ test('collateral token pages use contract-derived collateral USD price for dolla
   assert.equal(mainSource.includes("const collateralPrice = contractValue(page, 'collateralPrice') || contractValue(page, 'price');"), true);
   assert.equal(mainSource.includes("tokenUnitsToDollarMetric(totalSupply, collateralPrice, '$0')"), true);
 });
+
+test('wallet header uses live provider state instead of hardcoded wallet text', () => {
+  assert.equal(mainSource.includes('0x9f2B...E288'), false);
+  assert.equal(mainSource.includes('function renderWalletControl()'), true);
+  assert.equal(mainSource.includes('data-wallet-connect'), true);
+  assert.equal(mainSource.includes('data-wallet-change'), true);
+  assert.equal(mainSource.includes('data-wallet-disconnect'), true);
+  assert.equal(mainSource.includes('clearWalletDerivedState()'), true);
+});
+
+test('wallet cache can be reset after disconnect or account changes', () => {
+  assert.equal(eulerLiveSource.includes('export function resetWalletConnectionCache()'), true);
+  assert.equal(eulerLiveSource.includes('export async function requestWalletAccount'), true);
+  assert.equal(mainSource.includes('resetWalletConnectionCache();'), true);
+});

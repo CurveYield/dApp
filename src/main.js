@@ -28,9 +28,12 @@ import {
   fetchVaultRepayCapacity,
   fetchVaultWithdrawCapacity,
   fetchLivePageMetrics,
+  getConnectedWalletAccount,
   getWalletChainHex,
   activeRpcUrlForChain,
   rpcDiagnosticsSnapshot,
+  requestWalletAccount,
+  resetWalletConnectionCache,
   switchWalletNetwork,
   walletChainHexFor,
   repayToMarket,
@@ -110,6 +113,10 @@ const actionModes = {};
 const actionNotices = {};
 const fieldDrafts = {};
 let fieldDraftRenderTimer = null;
+let connectedWalletAccount = '';
+let walletConnectionLoaded = false;
+let walletRefreshInFlight = false;
+let walletDisconnected = window.sessionStorage.getItem('curveyield.euler.walletDisconnected') === '1';
 const walletNetworkNotices = {};
 const walletNetworkSwitchRequests = new Set();
 const liveMetrics = {};
@@ -324,6 +331,7 @@ function contractValue(page, key) {
 
 function walletBalanceFor(vaultAddress, symbol) {
   if (!vaultAddress) return `0 ${symbol}`;
+  if (walletDisconnected) return 'Connect wallet';
   const balance = walletBalances[vaultAddress.toLowerCase()];
   if (!balance) return 'Connect wallet';
   return `${balance.formatted} ${symbol}`;
@@ -331,6 +339,7 @@ function walletBalanceFor(vaultAddress, symbol) {
 
 function formattedCapacity(map, vaultAddress, symbol) {
   if (!vaultAddress) return `0 ${symbol}`;
+  if (walletDisconnected) return 'Connect wallet';
   const capacity = map[vaultAddress.toLowerCase()];
   if (!capacity) return 'Connect wallet';
   return `${capacity.formatted} ${symbol}`;
@@ -541,6 +550,71 @@ function setPreflightNotice(pageId, preflight) {
   render();
 }
 
+function clearWalletDerivedState() {
+  for (const key of Object.keys(walletBalances)) delete walletBalances[key];
+  for (const key of Object.keys(borrowCapacities)) delete borrowCapacities[key];
+  for (const key of Object.keys(withdrawCapacities)) delete withdrawCapacities[key];
+  for (const key of Object.keys(repayCapacities)) delete repayCapacities[key];
+  for (const key of Object.keys(accountLtvs)) delete accountLtvs[key];
+  for (const key of Object.keys(marketPositions)) delete marketPositions[key];
+  walletBalanceRequests.clear();
+  borrowCapacityRequests.clear();
+  withdrawCapacityRequests.clear();
+  repayCapacityRequests.clear();
+  accountLtvRequests.clear();
+  marketPositionRequests.clear();
+}
+
+function setConnectedWalletAccount(account) {
+  const normalized = account || '';
+  if (normalized.toLowerCase() === connectedWalletAccount.toLowerCase()) return false;
+  connectedWalletAccount = normalized;
+  clearWalletDerivedState();
+  return true;
+}
+
+async function refreshWalletConnection({ forceRender = false } = {}) {
+  if (walletRefreshInFlight) return;
+  walletRefreshInFlight = true;
+  try {
+    if (walletDisconnected || !window.ethereum) {
+      const changed = setConnectedWalletAccount('');
+      walletConnectionLoaded = true;
+      if (changed || forceRender) render();
+      return;
+    }
+    const account = await getConnectedWalletAccount().catch(() => '');
+    const changed = setConnectedWalletAccount(account);
+    walletConnectionLoaded = true;
+    if (changed || forceRender) render();
+  } finally {
+    walletRefreshInFlight = false;
+  }
+}
+
+async function connectWallet({ change = false } = {}) {
+  try {
+    walletDisconnected = false;
+    window.sessionStorage.removeItem('curveyield.euler.walletDisconnected');
+    const account = await requestWalletAccount({ forcePermission: change });
+    setConnectedWalletAccount(account);
+    actionNotices.wallet = '';
+    render();
+  } catch (error) {
+    actionNotices.wallet = normalizeTransactionError(error) || 'Wallet connection failed.';
+    render();
+  }
+}
+
+function disconnectWallet() {
+  walletDisconnected = true;
+  window.sessionStorage.setItem('curveyield.euler.walletDisconnected', '1');
+  resetWalletConnectionCache();
+  setConnectedWalletAccount('');
+  actionNotices.wallet = 'Wallet disconnected in this app.';
+  render();
+}
+
 function switchActionModeOnly(pageId, group, action) {
   const fallback = group === 'debt' ? 'borrow' : 'deposit';
   if (currentActionMode(pageId, group, fallback) === action) return false;
@@ -613,6 +687,7 @@ function invalidatePageBorrowCapacity(pageId) {
 }
 
 function refreshWalletBalancesForPage(page) {
+  if (walletDisconnected) return;
   if (['portfolio-action', 'portfolio-position'].includes(page.type)) {
     const market = getPageById(page.marketPageId);
     refreshWalletBalancesForPage(market);
@@ -713,6 +788,7 @@ function refreshWalletBalancesForPage(page) {
 }
 
 function refreshPortfolioPositions() {
+  if (walletDisconnected) return;
   PAGES.filter((item) => item.type === 'market').forEach((page) => {
     const debtVault = page.debtVaultAddress || page.contractAddress;
     const key = debtVault?.toLowerCase();
@@ -968,6 +1044,27 @@ function renderChainSelector(page) {
   `;
 }
 
+function renderWalletControl() {
+  const label = connectedWalletAccount
+    ? shortAddress(connectedWalletAccount)
+    : walletConnectionLoaded || walletDisconnected
+    ? 'Connect wallet'
+    : 'Checking wallet';
+  const connected = Boolean(connectedWalletAccount);
+  return `
+    <details class="wallet-menu">
+      <summary class="pill address">${label} <span class="chevron">⌄</span></summary>
+      <div class="chain-menu wallet-menu-panel">
+        ${connected ? `<span class="wallet-current">${connectedWalletAccount}</span>` : '<span class="wallet-current">No wallet connected</span>'}
+        <button class="chain-option" data-wallet-connect>${connected ? 'Reconnect wallet' : 'Connect wallet'}</button>
+        <button class="chain-option" data-wallet-change>Change wallet</button>
+        ${connected ? '<button class="chain-option" data-wallet-disconnect>Disconnect wallet</button>' : ''}
+        ${actionNotices.wallet ? `<span class="wallet-current">${actionNotices.wallet}</span>` : ''}
+      </div>
+    </details>
+  `;
+}
+
 function renderHeader(page) {
   const markets = PAGES.filter((item) => item.type === 'market');
   const earnVaults = PAGES.filter((item) => item.type === 'earn');
@@ -1074,7 +1171,7 @@ function renderHeader(page) {
       </nav>
       <div class="wallet-row">
         ${renderChainSelector(page)}
-        <button class="pill address">0x9f2B...E288 <span>⌄</span></button>
+        ${renderWalletControl()}
       </div>
     </header>
   `;
@@ -1980,7 +2077,7 @@ function renderChainWarning(page) {
 }
 
 async function ensurePageWalletNetwork(page) {
-  if (!window.ethereum || ['explore', 'home', 'ipor-vault'].includes(page.type) || !['ethereum', 'arbitrum', 'base'].includes(page.chainId)) return;
+  if (walletDisconnected || !window.ethereum || ['explore', 'home', 'ipor-vault'].includes(page.type) || !['ethereum', 'arbitrum', 'base'].includes(page.chainId)) return;
   if (walletNetworkSwitchRequests.has(page.id)) return;
   walletNetworkSwitchRequests.add(page.id);
   let shouldRender = false;
@@ -2623,7 +2720,7 @@ function renderIporVault(page) {
         </nav>
         <div class="ipor-wallet-row">
           <span class="ipor-pill">${baseLogo} Base</span>
-          <span class="ipor-pill">0x9f2B...E288</span>
+          ${renderWalletControl()}
         </div>
       </header>
       <main class="ipor-container">
@@ -2827,6 +2924,7 @@ function render() {
   if (page.type === 'ipor-vault') {
     root.innerHTML = renderIporVault(page);
     bindEvents();
+    refreshWalletConnection();
     ensurePageWalletNetwork(page);
     refreshWalletBalancesForPage(page);
     return;
@@ -2847,6 +2945,7 @@ function render() {
     </div>
   `;
   bindEvents();
+  refreshWalletConnection();
   ensurePageWalletNetwork(page);
   refreshWalletBalancesForPage(page);
   if (page.id === 'arb-easy-liquidations' && !liquidationRiskState.updatedAt && !liquidationRiskRefreshStarted) {
@@ -2896,6 +2995,18 @@ function bindEvents() {
       window.sessionStorage.setItem('curveyield.euler.selectedChain', selectedChainId);
       render();
     });
+  });
+
+  document.querySelector('[data-wallet-connect]')?.addEventListener('click', () => {
+    connectWallet();
+  });
+
+  document.querySelector('[data-wallet-change]')?.addEventListener('click', () => {
+    connectWallet({ change: true });
+  });
+
+  document.querySelector('[data-wallet-disconnect]')?.addEventListener('click', () => {
+    disconnectWallet();
   });
 
   document.querySelectorAll('[data-ipor-mode]').forEach((button) => {
@@ -3222,33 +3333,15 @@ if (window.ethereum?.on) {
   window.ethereum.on('chainChanged', () => {
     walletNetworkSwitchRequests.clear();
     for (const key of Object.keys(walletNetworkNotices)) delete walletNetworkNotices[key];
-    for (const key of Object.keys(walletBalances)) delete walletBalances[key];
-    for (const key of Object.keys(borrowCapacities)) delete borrowCapacities[key];
-    for (const key of Object.keys(withdrawCapacities)) delete withdrawCapacities[key];
-    for (const key of Object.keys(repayCapacities)) delete repayCapacities[key];
-    for (const key of Object.keys(accountLtvs)) delete accountLtvs[key];
-    for (const key of Object.keys(marketPositions)) delete marketPositions[key];
-    walletBalanceRequests.clear();
-    borrowCapacityRequests.clear();
-    withdrawCapacityRequests.clear();
-    repayCapacityRequests.clear();
-    accountLtvRequests.clear();
-    marketPositionRequests.clear();
+    clearWalletDerivedState();
     render();
   });
-  window.ethereum.on('accountsChanged', () => {
-    for (const key of Object.keys(walletBalances)) delete walletBalances[key];
-    for (const key of Object.keys(borrowCapacities)) delete borrowCapacities[key];
-    for (const key of Object.keys(withdrawCapacities)) delete withdrawCapacities[key];
-    for (const key of Object.keys(repayCapacities)) delete repayCapacities[key];
-    for (const key of Object.keys(accountLtvs)) delete accountLtvs[key];
-    for (const key of Object.keys(marketPositions)) delete marketPositions[key];
-    walletBalanceRequests.clear();
-    borrowCapacityRequests.clear();
-    withdrawCapacityRequests.clear();
-    repayCapacityRequests.clear();
-    accountLtvRequests.clear();
-    marketPositionRequests.clear();
+  window.ethereum.on('accountsChanged', (accounts = []) => {
+    resetWalletConnectionCache();
+    walletDisconnected = false;
+    window.sessionStorage.removeItem('curveyield.euler.walletDisconnected');
+    setConnectedWalletAccount(accounts?.[0] || '');
+    walletConnectionLoaded = true;
     render();
   });
 }

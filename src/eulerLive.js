@@ -453,6 +453,20 @@ export function formatUnits(value, decimals, precision = 2) {
   return `${whole}.${scaled.toString().padStart(precision, '0')}`;
 }
 
+export function formatTokenAmount(value, decimals, preferredPrecision = 4) {
+  const amount = BigInt(value || 0);
+  if (amount === 0n) return formatUnits(0n, decimals, preferredPrecision);
+  const base = 10n ** BigInt(decimals);
+  if (amount >= base) return formatUnits(amount, decimals, preferredPrecision);
+  let precision = preferredPrecision;
+  while (precision < 10) {
+    const scaled = (amount * (10n ** BigInt(precision))) / base;
+    if (scaled > 0n) return formatUnits(amount, decimals, precision);
+    precision += 2;
+  }
+  return formatUnits(amount, decimals, precision);
+}
+
 export function formatPercentFromBps(value) {
   const number = Number(value || 0n) / 100;
   return `${number.toFixed(2)}%`;
@@ -796,6 +810,15 @@ async function safeEthBatch(calls, rpcUrl, retries = 2, chainId = 'arbitrum') {
   return calls.map(() => null);
 }
 
+async function resilientEthBatch(calls, rpcUrl, retries = 2, chainId = 'arbitrum') {
+  const results = await safeEthBatch(calls, rpcUrl, retries, chainId);
+  if (results.every((result) => result !== null)) return results;
+  return Promise.all(results.map(async (result, index) => {
+    if (result !== null) return result;
+    return safeEthCall(calls[index].to, calls[index].data, rpcUrl, retries, chainId);
+  }));
+}
+
 function eulerAccountCandidates(owner, count = 16) {
   assertConfiguredAddress(owner, 'Wallet');
   const clean = strip0x(owner).toLowerCase();
@@ -813,7 +836,7 @@ async function selectVaultAccount({ vault, owner, chainId = 'arbitrum' }) {
     { to: vault, data: encodeBalanceOfCalldata(account) },
     { to: vault, data: encodeMaxWithdrawCalldata(account) },
   ]));
-  const results = await safeEthBatch(calls, null, 1, chainId);
+  const results = await resilientEthBatch(calls, null, 1, chainId);
   let selected = {
     account: owner,
     shareRaw: 0n,
@@ -838,7 +861,7 @@ async function selectMarketAccount({ collateralVault, debtVault, owner, chainId 
     { to: collateralVault, data: encodeBalanceOfCalldata(account) },
     { to: debtVault, data: encodeDebtOfCalldata(account) },
   ]));
-  const results = await safeEthBatch(calls, null, 1, chainId);
+  const results = await resilientEthBatch(calls, null, 1, chainId);
   let selected = {
     account: owner,
     collateralSharesRaw: 0n,
@@ -866,7 +889,7 @@ async function selectMarketDepositAccount({ collateralVault, debtVault, owner, c
     { to: evc, data: encodeCall(SELECTORS.getControllers, [encodeAddress(account)]) },
     { to: evc, data: encodeCall(SELECTORS.getCollaterals, [encodeAddress(account)]) },
   ]));
-  const results = await safeEthBatch(calls, null, 1, chainId);
+  const results = await resilientEthBatch(calls, null, 1, chainId);
   let firstEmpty = '';
   let ownerEmpty = false;
   for (let index = 0; index < candidates.length; index += 1) {
@@ -1241,6 +1264,7 @@ export async function depositToVault({ vault, amountText, onTransactionStep, onP
       selected.evc,
       encodeEvcBatch(buildMarketDepositBorrowBatchItems({
         account: finalReceiver,
+        collateralSourceAccount: owner,
         collateralVault: vault,
         debtVault: marketDebtVault,
         evc: selected.evc,
@@ -1274,7 +1298,7 @@ export async function fetchVaultWalletBalance({ vault, chainId = 'arbitrum' }) {
     token,
     decimals,
     raw,
-    formatted: formatUnits(raw, decimals, 4),
+    formatted: formatTokenAmount(raw, decimals, 4),
   };
 }
 
@@ -1310,8 +1334,8 @@ export async function fetchVaultWithdrawCapacity({ vault, marketDebtVault = '', 
     raw,
     shareRaw,
     suppliedRaw,
-    formatted: formatUnits(raw, decimals, 4),
-    suppliedFormatted: formatUnits(suppliedRaw, decimals, 4),
+    formatted: formatTokenAmount(raw, decimals, 4),
+    suppliedFormatted: formatTokenAmount(suppliedRaw, decimals, 4),
   };
 }
 
@@ -1395,10 +1419,10 @@ async function readMarketPositionSnapshot({
     collateralValue,
     debtValue,
     netAssetValue,
-    collateralFormatted: formatUnits(collateralAssets, collateralDecimals, 4),
-    debtFormatted: formatUnits(debtRaw, debtDecimals, 4),
-    withdrawCapacityFormatted: formatUnits(maxWithdraw, collateralDecimals, 4),
-    borrowCapacityFormatted: formatUnits(borrowCapacityRaw, debtDecimals, 4),
+    collateralFormatted: formatTokenAmount(collateralAssets, collateralDecimals, 4),
+    debtFormatted: formatTokenAmount(debtRaw, debtDecimals, 4),
+    withdrawCapacityFormatted: formatTokenAmount(maxWithdraw, collateralDecimals, 4),
+    borrowCapacityFormatted: formatTokenAmount(borrowCapacityRaw, debtDecimals, 4),
     collateralValueFormatted: formatUsdValue(collateralValue),
     debtValueFormatted: formatUsdValue(debtValue),
     netAssetValueFormatted: formatUsdValue(netAssetValue),
@@ -1441,7 +1465,7 @@ export async function fetchMarketPositions({ debtVault, collateralVault, chainId
     { to: collateralVault, data: encodeBalanceOfCalldata(account) },
     { to: debtVault, data: encodeDebtOfCalldata(account) },
   ]));
-  const results = await safeEthBatch(calls, null, 1, chainId);
+  const results = await resilientEthBatch(calls, null, 1, chainId);
   const active = [];
   for (let index = 0; index < candidates.length; index += 1) {
     const account = candidates[index];
@@ -1495,7 +1519,7 @@ export async function fetchVaultRepayCapacity({ debtVault, collateralVault = '',
     raw,
     debt,
     balance,
-    formatted: formatUnits(raw, decimals, 4),
+    formatted: formatTokenAmount(raw, decimals, 4),
   };
 }
 
@@ -1543,7 +1567,7 @@ export async function fetchMarketBorrowCapacity({ debtVault, collateralVault = '
     evc,
     decimals,
     raw,
-    formatted: formatUnits(raw, decimals, 4),
+    formatted: formatTokenAmount(raw, decimals, 4),
   };
 }
 

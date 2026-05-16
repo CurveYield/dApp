@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   buildMarketDepositBorrowBatchCalldata,
   buildPositionCollateralWithdrawBatchCalldata,
+  formatTokenAmount,
 } from './eulerLive.js';
 
 test('encodes collateral withdraw as the successful Euler EVC batch transaction', () => {
@@ -41,4 +42,36 @@ test('encodes new market deposit from wallet into selected Euler subaccount', ()
 
   assert.equal(actual.includes(encodedWallet), true);
   assert.equal(actual.includes(`6e553f65${encodedAmount}${encodedSubaccount}`), true);
+});
+
+test('encodes standalone collateral supply from wallet into existing Euler account', () => {
+  const wallet = '0x9f2B20A772246960810045905B7daccf960eE288';
+  const position = '0x9f2B20A772246960810045905b7DACcF960eE28a';
+  const collateralVault = '0x006e2989B00f2bfe070502B1fE0F5Ae8a007e3a2';
+  const debtVault = '0xa264e81dF3C81953eEbae182441811e5CE894632';
+  const evc = '0x0C9a3dd6b8F28529d72d7f9cE918D493519EE383';
+  const amount = 100000000000000000n;
+  const actual = buildMarketDepositBorrowBatchCalldata({
+    account: position,
+    collateralSourceAccount: wallet,
+    collateralVault,
+    debtVault,
+    evc,
+    collateralAmount: amount,
+    borrowAmount: 0n,
+    borrowReceiver: wallet,
+  }).toLowerCase();
+
+  const encodedWallet = wallet.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+  const encodedPosition = position.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+  const encodedAmount = amount.toString(16).padStart(64, '0');
+
+  assert.equal(actual.includes(encodedWallet), true);
+  assert.equal(actual.includes(`6e553f65${encodedAmount}${encodedPosition}`), true);
+});
+
+test('formats tiny nonzero wallet action amounts without rounding to zero', () => {
+  assert.equal(formatTokenAmount(1_000_000_000_000n, 18, 4), '0.000001');
+  assert.equal(formatTokenAmount(0n, 18, 4), '0.0000');
+  assert.equal(formatTokenAmount(2_500_000_000_000_000_000n, 18, 4), '2.5000');
 });

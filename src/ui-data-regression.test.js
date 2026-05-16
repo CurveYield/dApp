@@ -70,3 +70,9 @@ test('wallet cache can be reset after disconnect or account changes', () => {
   assert.equal(eulerLiveSource.includes('export async function requestWalletAccount'), true);
   assert.equal(mainSource.includes('resetWalletConnectionCache();'), true);
 });
+
+test('wallet position scans retry individual calls after failed RPC batches', () => {
+  assert.equal(eulerLiveSource.includes('async function resilientEthBatch'), true);
+  assert.equal(eulerLiveSource.includes('return safeEthCall(calls[index].to, calls[index].data'), true);
+  assert.equal(eulerLiveSource.includes('const results = await resilientEthBatch(calls, null, 1, chainId);'), true);
+});

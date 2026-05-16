@@ -40,7 +40,8 @@ test('Earn allocation conversion retries missing RPC batch results', () => {
 
 test('volatile live metrics are not hydrated from stale persisted snapshots', () => {
   assert.equal(mainSource.includes('const LIVE_METRICS_MAX_AGE_MS = 30_000'), true);
-  assert.equal(mainSource.includes('freshLiveMetricsOnly(remote)'), true);
+  assert.equal(mainSource.includes('bundled,'), true);
+  assert.equal(mainSource.includes('...freshLiveMetricsOnly(remote)'), true);
   assert.equal(mainSource.includes('freshLiveMetricsOnly(local)'), true);
 });
 

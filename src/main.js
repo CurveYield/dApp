@@ -173,14 +173,17 @@ function freshLiveMetricsOnly(metrics = {}, now = Date.now()) {
 }
 
 async function hydrateLiveMetrics() {
-  const [, remote, local] = await Promise.all([
+  const [bundled, remote, local] = await Promise.all([
     loadBundledLiveMetrics(window.fetch.bind(window)),
     loadRemoteLiveMetrics(window.fetch.bind(window), window.localStorage),
     Promise.resolve(readLiveMetricsJson(window.localStorage.getItem(LIVE_METRICS_STORAGE_KEY))),
   ]);
   replaceLiveMetrics(mergeLiveMetricsSources({
-    bundled: freshLiveMetricsOnly(remote),
-    local: freshLiveMetricsOnly(local),
+    bundled,
+    local: {
+      ...freshLiveMetricsOnly(remote),
+      ...freshLiveMetricsOnly(local),
+    },
   }));
 }
 

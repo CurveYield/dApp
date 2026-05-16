@@ -195,7 +195,7 @@ async function hydrateApyState() {
 }
 
 function normalizeChainId(chainId) {
-  return CHAINS.some((chain) => chain.id === chainId) ? chainId : 'arbitrum';
+  return CHAINS.some((chain) => chain.id === chainId) ? chainId : 'ethereum';
 }
 
 function isUnresolvedDisplayValue(value) {
@@ -2052,7 +2052,7 @@ function renderMarketTabs(page, subview) {
 }
 
 function renderChainWarning(page) {
-  if (['explore', 'home', 'ipor-vault'].includes(page.type)) return '';
+  if (page.chainId === 'global' || ['explore', 'home', 'portfolio', 'ipor-vault'].includes(page.type)) return '';
   const switchNotice = walletNetworkNotices[page.id];
   if (switchNotice) {
     return `

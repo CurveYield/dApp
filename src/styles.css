@@ -3468,4 +3468,40 @@ button {
     width: 18px;
     height: 18px;
   }
+
+  .portfolio-hero {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .portfolio-hero h1,
+  .position-detail-title h1,
+  .position-section-title {
+    font-size: 28px;
+    line-height: 34px;
+  }
+
+  .portfolio-summary-grid,
+  .position-detail-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-summary-card {
+    padding: 18px;
+  }
+
+  .portfolio-summary-card h2,
+  .position-asset-panel h2 {
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .portfolio-summary-lines div {
+    gap: 12px;
+  }
+
+  .portfolio-tabs button {
+    min-height: 48px;
+    font-size: 14px;
+  }
 }

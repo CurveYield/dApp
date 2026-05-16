@@ -846,6 +846,10 @@ function addressLink(page, address, label = shortAddress(address)) {
   return `<a class="address-link" href="${url}" target="_blank" rel="noreferrer">${label}</a>`;
 }
 
+function riskManagerAddressFor(page) {
+  return page.routerAddress || contractValue(page, 'oracleRouter') || '';
+}
+
 function etherscanAddressLink(address, label = shortAddress(address)) {
   const url = etherscanAddressUrl(address);
   if (!url) return label || 'Pending';
@@ -2193,7 +2197,7 @@ function renderMarket(page) {
             ${metric(`${page.debt} token`, contractValue(page, 'debtAssetAddress') ? addressLink(page, contractValue(page, 'debtAssetAddress')) : 'Pending')}
             ${metric(`${page.debt} vault`, addressLink(page, page.debtVaultAddress || page.contractAddress))}
             ${metric(`${page.debt} debt`, addressLink(page, page.debtVaultAddress || page.contractAddress))}
-            ${metric('Risk manager', addressLink(page, page.routerAddress))}
+            ${metric('Risk manager', addressLink(page, riskManagerAddressFor(page)))}
             ${metric('Fee receiver', contractValue(page, 'feeReceiver') ? addressLink(page, contractValue(page, 'feeReceiver')) : 'Pending')}
             ${metric('Oracle router', contractValue(page, 'oracleRouter') ? addressLink(page, contractValue(page, 'oracleRouter')) : addressLink(page, page.routerAddress))}
             ${metric('Unit of account', contractValue(page, 'unitOfAccount') ? addressLink(page, contractValue(page, 'unitOfAccount')) : 'Pending')}
@@ -2469,7 +2473,7 @@ function renderMarketTokenSubview(page, side, notice) {
           <div class="stat-list">
             ${metric(`${token} token`, tokenAddress ? addressLink(page, tokenAddress) : 'Pending')}
             ${metric(`${token} vault`, addressLink(page, actionVault))}
-            ${metric('Risk manager', addressLink(page, page.routerAddress))}
+            ${metric('Risk manager', addressLink(page, riskManagerAddressFor(page)))}
             ${metric('Hook target', 'None')}
           </div>
         `)}
@@ -2569,7 +2573,7 @@ function renderDebtTokenSubview(page, notice) {
             ${metric(`${token} token`, tokenAddress ? addressLink(page, tokenAddress) : 'Pending')}
             ${metric(`${token} vault`, addressLink(page, actionVault))}
             ${metric(`${token} debt`, addressLink(page, actionVault))}
-            ${metric('Risk manager', addressLink(page, page.routerAddress))}
+            ${metric('Risk manager', addressLink(page, riskManagerAddressFor(page)))}
             ${metric('Fee receiver', contractValue(page, 'feeReceiver') ? addressLink(page, contractValue(page, 'feeReceiver')) : 'Pending')}
             ${metric('Oracle router', contractValue(page, 'oracleRouter') ? addressLink(page, contractValue(page, 'oracleRouter')) : addressLink(page, page.routerAddress))}
             ${metric('Unit of account', contractValue(page, 'unitOfAccount') ? addressLink(page, contractValue(page, 'unitOfAccount')) : 'Pending')}

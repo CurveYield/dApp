@@ -101,8 +101,7 @@ let developerMenuEnabled = window.sessionStorage.getItem('curveyield.euler.devMe
 const productionModeEnabled = new URLSearchParams(window.location.search).get('prod') === '1'
   || window.localStorage.getItem('curveyield.euler.productionMode') === '1';
 let selectedChainId = normalizeChainId(window.sessionStorage.getItem('curveyield.euler.selectedChain') || currentPage().chainId);
-let exploreFilterChain = window.sessionStorage.getItem('curveyield.euler.exploreChain') || 'all';
-let exploreFilterType = window.sessionStorage.getItem('curveyield.euler.exploreType') || 'all';
+let exploreSearchText = window.sessionStorage.getItem('curveyield.euler.exploreSearch') || '';
 let activeInfo = null;
 let iporPerformanceModes = new Set(
   (window.sessionStorage.getItem('curveyield.ipor.performanceModes') || 'apy,share')
@@ -812,6 +811,14 @@ function shortAddress(address) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
+function escapeAttribute(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function explorerAddressUrl(page, address) {
   if (!address || !/^0x[0-9a-fA-F]{40}$/.test(address)) return '';
   if (page.chainId === 'arbitrum') return `https://arbiscan.io/address/${address}`;
@@ -1086,10 +1093,6 @@ function renderHeader(page) {
         </div>
       </details>
       <nav class="main-nav" aria-label="Euler pages">
-        <a class="nav-item ${page.type === 'ipor-vault' ? 'active' : ''}" href="#/ipor-crvusd-lp-vault">
-          <span class="nav-dot">IP</span>
-          <span>IPOR</span>
-        </a>
         <a class="nav-item ${['portfolio', 'portfolio-action', 'portfolio-position'].includes(page.type) ? 'active' : ''}" href="#/portfolio">
           <span class="nav-dot">◎</span>
           <span>Portfolio</span>
@@ -1392,17 +1395,21 @@ function renderExploreRow(page) {
 }
 
 function exploreFilteredItems() {
+  const query = exploreSearchText.trim().toLowerCase();
   return PAGES.filter((item) => ['market', 'earn'].includes(item.type))
-    .filter((item) => exploreFilterChain === 'all' || item.chainId === exploreFilterChain)
-    .filter((item) => exploreFilterType === 'all' || item.type === exploreFilterType);
-}
-
-function exploreFilterButton(group, value, label, current) {
-  return `
-    <button class="${value === current ? 'active' : ''}" data-explore-filter="${group}" data-explore-value="${value}">
-      ${label}
-    </button>
-  `;
+    .filter((item) => {
+      if (!query) return true;
+      const haystack = [
+        item.title,
+        item.subtitle,
+        item.navLabel,
+        item.network,
+        item.collateral,
+        item.debt,
+        item.asset,
+      ].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(query);
+    });
 }
 
 function renderExplore(page) {
@@ -1418,18 +1425,11 @@ function renderExplore(page) {
     <div class="explore-toolbar">
       <label class="explore-search">
         <span>⌕</span>
-        <input placeholder="Search by asset, market, curator..." aria-label="Search by asset, market, curator" />
+        <input placeholder="Search by asset, market, curator..." aria-label="Search by asset, market, curator" data-explore-search value="${escapeAttribute(exploreSearchText)}" />
       </label>
-      <div class="explore-filter-group" aria-label="Filter Explore">
-        ${exploreFilterButton('type', 'all', 'Active', exploreFilterType)}
-        ${exploreFilterButton('chain', 'all', 'Risk manager', exploreFilterChain)}
-        ${exploreFilterButton('type', 'market', 'Market', exploreFilterType)}
-        ${exploreFilterButton('type', 'earn', 'Asset', exploreFilterType)}
-        <button type="button" disabled>+ Add filter</button>
-      </div>
     </div>
     <section class="explore-list">
-      ${exploreItems.length ? exploreItems.map(renderExploreRow).join('') : '<div class="explore-empty">No markets match those filters.</div>'}
+      ${exploreItems.length ? exploreItems.map(renderExploreRow).join('') : '<div class="explore-empty">No markets match that search.</div>'}
     </section>
   `;
 }
@@ -1483,7 +1483,6 @@ function renderPortfolio(page) {
     <div class="portfolio-tabs">
       <button class="active">Positions <b>${positions.length}</b></button>
       <button>Deposits <b>${PAGES.filter((item) => item.type === 'earn').length}</b></button>
-      <button>Rewards <b>0</b></button>
     </div>
     <section class="portfolio-section">
       <div class="section-heading">
@@ -3026,18 +3025,11 @@ function bindEvents() {
     });
   });
 
-  document.querySelectorAll('[data-explore-filter]').forEach((button) => {
-    button.addEventListener('click', () => {
-      if (button.dataset.exploreFilter === 'chain') {
-        exploreFilterChain = button.dataset.exploreValue || 'all';
-        window.sessionStorage.setItem('curveyield.euler.exploreChain', exploreFilterChain);
-      }
-      if (button.dataset.exploreFilter === 'type') {
-        exploreFilterType = button.dataset.exploreValue || 'all';
-        window.sessionStorage.setItem('curveyield.euler.exploreType', exploreFilterType);
-      }
-      render();
-    });
+  document.querySelector('[data-explore-search]')?.addEventListener('input', (event) => {
+    exploreSearchText = event.target.value || '';
+    window.sessionStorage.setItem('curveyield.euler.exploreSearch', exploreSearchText);
+    window.clearTimeout(fieldDraftRenderTimer);
+    fieldDraftRenderTimer = window.setTimeout(() => render(), 120);
   });
 
   document.querySelectorAll('[data-chain-id]').forEach((button) => {

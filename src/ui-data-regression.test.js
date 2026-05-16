@@ -85,19 +85,31 @@ test('market pair detail page includes Euler-style information sections', () => 
   assert.equal(renderMarketSource.includes('button class="disabled-action-tab" disabled'), true);
 });
 
-test('explore page keeps Euler-style search and filter labels', () => {
+test('explore page keeps functional search without inactive filter controls', () => {
   assert.equal(mainSource.includes('placeholder="Search by asset, market, curator..."'), true);
-  for (const label of ['Active', 'Risk manager', 'Market', 'Asset', 'Add filter']) {
-    assert.equal(mainSource.includes(label), true, `${label} filter missing`);
-  }
+  assert.equal(mainSource.includes('data-explore-search'), true);
+  assert.equal(mainSource.includes('data-explore-filter'), false);
+  assert.equal(stylesSource.includes('explore-filter-group'), false);
 });
 
-test('portfolio tabs use Euler naming for deposits instead of savings', () => {
+test('portfolio tabs use Euler naming for deposits and hide rewards', () => {
   const portfolioStart = mainSource.indexOf('function renderPortfolio(page)');
   const portfolioEnd = mainSource.indexOf('function selectedPositionForMarket');
   const renderPortfolioSource = mainSource.slice(portfolioStart, portfolioEnd);
   assert.equal(renderPortfolioSource.includes('Deposits'), true);
   assert.equal(renderPortfolioSource.includes('Savings'), false);
+  assert.equal(renderPortfolioSource.includes('Rewards'), false);
+});
+
+test('IPOR is reachable from the brand menu but removed from the top Euler nav', () => {
+  const headerStart = mainSource.indexOf('function renderHeader(page)');
+  const headerEnd = mainSource.indexOf('function renderExploreGraph');
+  const renderHeaderSource = mainSource.slice(headerStart, headerEnd);
+  const navStart = renderHeaderSource.indexOf('<nav class="main-nav"');
+  const navEnd = renderHeaderSource.indexOf('</nav>', navStart);
+  const mainNavSource = renderHeaderSource.slice(navStart, navEnd);
+  assert.equal(renderHeaderSource.includes('href="#/ipor-crvusd-lp-vault"'), true);
+  assert.equal(mainNavSource.includes('IPOR'), false);
 });
 
 test('wallet cache can be reset after disconnect or account changes', () => {

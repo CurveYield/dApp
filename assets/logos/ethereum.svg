@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Ethereum">
+  <circle cx="16" cy="16" r="16" fill="#fff"/>
+  <g transform="translate(16 16) scale(.74) translate(-16 -16)">
+    <path fill="#343434" d="M16.008 3.2v9.46l7.994 3.572L16.008 3.2Z"/>
+    <path fill="#8c8c8c" d="M16.008 3.2 8.014 16.232l7.994-3.572V3.2Z"/>
+    <path fill="#3c3c3b" d="M16.008 22.36v6.433l8-11.074-8 4.64Z"/>
+    <path fill="#8c8c8c" d="M16.008 28.793V22.36l-7.994-4.64 7.994 11.074Z"/>
+    <path fill="#141414" d="m16.008 20.873 7.994-4.64-7.994-3.568v8.208Z"/>
+    <path fill="#393939" d="m8.014 16.232 7.994 4.641v-8.208l-7.994 3.567Z"/>
+  </g>
+</svg>

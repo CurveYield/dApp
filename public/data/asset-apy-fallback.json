@@ -1,0 +1,107 @@
+{
+  "updatedAt": 1778322426211,
+  "sources": {
+    "base:crvUSD": "fixed",
+    "arbitrum:crvUSD": "fixed",
+    "arbitrum:xETH": "fixed",
+    "ethereum:asdCRV": "defillama",
+    "ethereum:aCRV": "defillama",
+    "ethereum:st-yCRV": "defillama",
+    "arbitrum:asdCRV": "defillama",
+    "ethereum:scrvUSD": "curve",
+    "ethereum:yvCurve-yYB": "yearn",
+    "ethereum:YBcrvUSD": "beefy-data"
+  },
+  "values": {
+    "base:crvUSD": {
+      "apy": 0,
+      "formatted": "0.00%",
+      "project": "fixed",
+      "chain": "Base",
+      "pool": "hardcoded",
+      "source": "fixed",
+      "updatedAt": 1778322423421
+    },
+    "arbitrum:crvUSD": {
+      "apy": 0,
+      "formatted": "0.00%",
+      "project": "fixed",
+      "chain": "Arbitrum",
+      "pool": "hardcoded",
+      "source": "fixed",
+      "updatedAt": 1778322423421
+    },
+    "arbitrum:xETH": {
+      "apy": 0,
+      "formatted": "0.00%",
+      "project": "fixed",
+      "chain": "Arbitrum",
+      "pool": "hardcoded",
+      "source": "fixed",
+      "updatedAt": 1778322423421
+    },
+    "ethereum:asdCRV": {
+      "apy": 38.93,
+      "formatted": "38.93%",
+      "project": "concentrator",
+      "chain": "Ethereum",
+      "pool": "d853189e-6f71-45d0-b3ee-b3b989faa447",
+      "source": "defillama",
+      "updatedAt": 1778322424579
+    },
+    "ethereum:aCRV": {
+      "apy": 16.47,
+      "formatted": "16.47%",
+      "project": "concentrator",
+      "chain": "Ethereum",
+      "pool": "fc43f71b-6b18-42d1-86a8-e8d5192857cb",
+      "source": "defillama",
+      "updatedAt": 1778322424580
+    },
+    "ethereum:st-yCRV": {
+      "apy": 23.30995,
+      "formatted": "23.31%",
+      "project": "yearn-finance",
+      "chain": "Ethereum",
+      "pool": "320550a3-b7c4-4017-a5dd-f3ebed459470",
+      "source": "defillama",
+      "updatedAt": 1778322424580
+    },
+    "arbitrum:asdCRV": {
+      "apy": 38.93,
+      "formatted": "38.93%",
+      "project": "concentrator",
+      "chain": "Ethereum",
+      "pool": "d853189e-6f71-45d0-b3ee-b3b989faa447",
+      "source": "defillama",
+      "updatedAt": 1778322424580
+    },
+    "ethereum:scrvUSD": {
+      "apy": 0.6336711112672644,
+      "formatted": "0.63%",
+      "project": "curve",
+      "chain": "Ethereum",
+      "pool": "scrvUSD savings",
+      "source": "curve",
+      "updatedAt": 1778322425005
+    },
+    "ethereum:yvCurve-yYB": {
+      "apy": 52.8635518161096,
+      "formatted": "52.86%",
+      "project": "yearn",
+      "chain": "Ethereum Mainnet",
+      "pool": "0x0844C227b892be5d7c837000C096f64bFc316c2d",
+      "source": "yearn",
+      "updatedAt": 1778320838334
+    },
+    "ethereum:YBcrvUSD": {
+      "apy": 26.042112902730803,
+      "formatted": "26.04%",
+      "project": "beefy",
+      "chain": "Ethereum Mainnet",
+      "pool": "curve-crvusd-yb",
+      "source": "beefy-data",
+      "updatedAt": 1778322426211
+    }
+  }
+}

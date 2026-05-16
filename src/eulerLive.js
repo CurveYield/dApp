@@ -1988,8 +1988,8 @@ async function readEarnAllocations(page, earnVault, assetDecimals, priceRaw, rpc
     data: encodeCall(SELECTORS.earnConfig, [encodeAddress(vaultAddress)]),
   }));
   const [shareResults, configResults] = await Promise.all([
-    safeEthBatch(shareCalls, rpcUrl, 2, page.chainId),
-    safeEthBatch(configCalls, rpcUrl, 2, page.chainId),
+    resilientEthBatch(shareCalls, rpcUrl, 2, page.chainId),
+    resilientEthBatch(configCalls, rpcUrl, 2, page.chainId),
   ]);
   const assetCalls = vaultAddresses.map((vaultAddress, index) => {
     const shares = decodeUint(shareResults[index]);
@@ -1997,7 +1997,7 @@ async function readEarnAllocations(page, earnVault, assetDecimals, priceRaw, rpc
       ? { index, call: { to: vaultAddress, data: encodeCall(SELECTORS.convertToAssets, [encodeUint(shares)]) } }
       : null;
   }).filter(Boolean);
-  const assetResults = assetCalls.length ? await safeEthBatch(assetCalls.map((entry) => entry.call), rpcUrl, 2, page.chainId) : [];
+  const assetResults = assetCalls.length ? await resilientEthBatch(assetCalls.map((entry) => entry.call), rpcUrl, 2, page.chainId) : [];
   const allocationAssetsByIndex = new Map();
   await Promise.all(assetCalls.map(async (entry, resultIndex) => {
     let raw = assetResults[resultIndex];

@@ -36,6 +36,8 @@ test('Earn vault APY uses the same borrower-paid APY shown on market pages', () 
 test('Earn allocation conversion retries missing RPC batch results', () => {
   assert.equal(eulerLiveSource.includes('allocationAssetsByIndex'), true);
   assert.equal(eulerLiveSource.includes('if (!raw) raw = await safeEthCall(entry.call.to, entry.call.data'), true);
+  assert.equal(eulerLiveSource.includes('resilientEthBatch(shareCalls, rpcUrl, 2, page.chainId)'), true);
+  assert.equal(eulerLiveSource.includes('resilientEthBatch(configCalls, rpcUrl, 2, page.chainId)'), true);
 });
 
 test('volatile live metrics are not hydrated from stale persisted snapshots', () => {

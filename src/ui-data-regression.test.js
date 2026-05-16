@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const sourceDir = dirname(fileURLToPath(import.meta.url));
 const mainSource = readFileSync(join(sourceDir, 'main.js'), 'utf8');
 const eulerLiveSource = readFileSync(join(sourceDir, 'eulerLive.js'), 'utf8');
+const stylesSource = readFileSync(join(sourceDir, 'styles.css'), 'utf8');
 
 test('portfolio UI does not show heuristic APY/ROE or Unknown placeholders', () => {
   assert.equal(mainSource.includes('computedEarnSupplyApy(page)'), false);
@@ -64,8 +65,14 @@ test('wallet header uses live provider state instead of hardcoded wallet text', 
   assert.equal(mainSource.includes('function renderWalletControl()'), true);
   assert.equal(mainSource.includes('data-wallet-connect'), true);
   assert.equal(mainSource.includes('data-wallet-change'), true);
-  assert.equal(mainSource.includes('data-wallet-disconnect'), true);
   assert.equal(mainSource.includes('clearWalletDerivedState()'), true);
+});
+
+test('wallet header keeps the original pill format instead of adding a custom menu layout', () => {
+  assert.equal(mainSource.includes('class="wallet-menu"'), false);
+  assert.equal(mainSource.includes('wallet-menu-panel'), false);
+  assert.equal(stylesSource.includes('.wallet-menu'), false);
+  assert.equal(mainSource.includes('class="pill address"'), true);
 });
 
 test('wallet cache can be reset after disconnect or account changes', () => {

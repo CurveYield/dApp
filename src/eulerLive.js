@@ -747,6 +747,28 @@ async function rpcCall(rpcUrl, method, params, chainId = 'arbitrum') {
   throw lastError || new Error('RPC error');
 }
 
+function isTransientRpcTransportError(error) {
+  return /too many requests|rate|timeout|fetch failed|failed to fetch|network|429/i.test(error?.message || '');
+}
+
+function injectedProvider() {
+  return globalThis.window?.ethereum || null;
+}
+
+async function walletProviderEthCall(to, data, chainId = 'arbitrum') {
+  const provider = injectedProvider();
+  if (!provider?.request) throw new Error('No connected wallet provider for RPC fallback.');
+  const expectedChain = CHAIN_CONFIGS[chainId]?.chainHex?.toLowerCase();
+  const actualChain = await provider.request({ method: 'eth_chainId' }).catch(() => '');
+  if (!expectedChain || String(actualChain || '').toLowerCase() !== expectedChain) {
+    throw new Error('Connected wallet is not on the requested chain.');
+  }
+  return provider.request({
+    method: 'eth_call',
+    params: [{ to, data }, 'latest'],
+  });
+}
+
 async function rpcBatch(calls, rpcUrl, chainId = 'arbitrum') {
   let lastError;
   const attempts = rpcUrl ? 1 : rpcUrlsForChain(chainId).length;
@@ -779,7 +801,14 @@ async function rpcBatch(calls, rpcUrl, chainId = 'arbitrum') {
 
 export async function ethCall(to, data, rpcUrl = null, chainId = 'arbitrum') {
   assertConfiguredAddress(to);
-  return rpcCall(rpcUrl, 'eth_call', [{ to, data }, 'latest'], chainId);
+  try {
+    return await rpcCall(rpcUrl, 'eth_call', [{ to, data }, 'latest'], chainId);
+  } catch (error) {
+    if (rpcUrl || !isTransientRpcTransportError(error)) throw error;
+    return walletProviderEthCall(to, data, chainId).catch(() => {
+      throw error;
+    });
+  }
 }
 
 async function safeEthCall(to, data, rpcUrl, retries = 2, chainId = 'arbitrum') {
@@ -787,7 +816,7 @@ async function safeEthCall(to, data, rpcUrl, retries = 2, chainId = 'arbitrum') 
     try {
       return await ethCall(to, data, rpcUrl, chainId);
     } catch (error) {
-      if (attempt === retries || !/too many requests|rate|timeout|fetch failed|network|429/i.test(error?.message || '')) return null;
+      if (attempt === retries || !isTransientRpcTransportError(error)) return null;
       await new Promise((resolve) => globalThis.setTimeout(resolve, 350 * (attempt + 1)));
     }
   }
@@ -801,7 +830,7 @@ async function safeEthBatch(calls, rpcUrl, retries = 2, chainId = 'arbitrum') {
       if (results.every((result) => result !== null) || attempt === retries) return results;
       throw new Error('RPC batch returned partial null results');
     } catch (error) {
-      if (attempt === retries || !/too many requests|rate|timeout|fetch failed|network|429/i.test(error?.message || '')) {
+      if (attempt === retries || !isTransientRpcTransportError(error)) {
         return calls.map(() => null);
       }
       await new Promise((resolve) => globalThis.setTimeout(resolve, 350 * (attempt + 1)));

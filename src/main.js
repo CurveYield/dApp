@@ -1054,18 +1054,7 @@ function renderWalletControl() {
     ? 'Connect wallet'
     : 'Checking wallet';
   const connected = Boolean(connectedWalletAccount);
-  return `
-    <details class="wallet-menu">
-      <summary class="pill address">${label} <span class="chevron">⌄</span></summary>
-      <div class="chain-menu wallet-menu-panel">
-        ${connected ? `<span class="wallet-current">${connectedWalletAccount}</span>` : '<span class="wallet-current">No wallet connected</span>'}
-        <button class="chain-option" data-wallet-connect>${connected ? 'Reconnect wallet' : 'Connect wallet'}</button>
-        <button class="chain-option" data-wallet-change>Change wallet</button>
-        ${connected ? '<button class="chain-option" data-wallet-disconnect>Disconnect wallet</button>' : ''}
-        ${actionNotices.wallet ? `<span class="wallet-current">${actionNotices.wallet}</span>` : ''}
-      </div>
-    </details>
-  `;
+  return `<button class="pill address" ${connected ? 'data-wallet-change' : 'data-wallet-connect'}>${label} <span>⌄</span></button>`;
 }
 
 function renderHeader(page) {
@@ -2723,7 +2712,7 @@ function renderIporVault(page) {
         </nav>
         <div class="ipor-wallet-row">
           <span class="ipor-pill">${baseLogo} Base</span>
-          ${renderWalletControl()}
+          <span class="ipor-pill">${connectedWalletAccount ? shortAddress(connectedWalletAccount) : 'Connect wallet'}</span>
         </div>
       </header>
       <main class="ipor-container">

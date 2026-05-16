@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   buildMarketDepositBorrowBatchCalldata,
   buildPositionCollateralWithdrawBatchCalldata,
+  ethCall,
   formatTokenAmount,
 } from './eulerLive.js';
 
@@ -74,4 +75,37 @@ test('formats tiny nonzero wallet action amounts without rounding to zero', () =
   assert.equal(formatTokenAmount(1_000_000_000_000n, 18, 4), '0.000001');
   assert.equal(formatTokenAmount(0n, 18, 4), '0.0000');
   assert.equal(formatTokenAmount(2_500_000_000_000_000_000n, 18, 4), '2.5000');
+});
+
+test('falls back to connected wallet eth_call when public RPC fetch fails on matching chain', async () => {
+  const originalFetch = globalThis.fetch;
+  const originalWindow = globalThis.window;
+  const calls = [];
+  globalThis.fetch = async () => {
+    throw new TypeError('Failed to fetch');
+  };
+  globalThis.window = {
+    ethereum: {
+      request: async ({ method, params }) => {
+        calls.push({ method, params });
+        if (method === 'eth_chainId') return '0x1';
+        if (method === 'eth_call') return '0x' + '2a'.padStart(64, '0');
+        throw new Error(`Unexpected wallet method ${method}`);
+      },
+    },
+  };
+
+  try {
+    const result = await ethCall(
+      '0x0000000000000000000000000000000000000001',
+      '0x70a08231' + '0'.repeat(64),
+      null,
+      'ethereum',
+    );
+    assert.equal(result, '0x' + '2a'.padStart(64, '0'));
+    assert.equal(calls.some((call) => call.method === 'eth_call'), true);
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.window = originalWindow;
+  }
 });

@@ -891,8 +891,18 @@ button {
 
   .ipor-topbar nav,
   .ipor-wallet-row,
+  .ipor-title-row,
   .ipor-badges {
     flex-wrap: wrap;
+  }
+
+  .ipor-title-row > div {
+    min-width: 0;
+    flex: 1 1 180px;
+  }
+
+  .ipor-page-button {
+    flex: 0 0 auto;
   }
 
   .ipor-container {

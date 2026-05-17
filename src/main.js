@@ -1618,12 +1618,12 @@ function renderPortfolioAction(page) {
   const title = action === 'borrow' ? `Borrow more ${market.debt}` : action === 'repay' ? `Repay ${market.debt}` : action === 'supply' ? `Supply ${market.collateral}` : `Withdraw ${market.collateral}`;
   const positionAccount = position?.account || '';
   const button = action === 'borrow'
-    ? `<button class="primary-btn" data-live-borrow-more="${page.id}" data-live-debt-vault="${debtVault}" data-live-collateral-vault="${collateralVault}" data-live-account="${positionAccount}" data-live-field-name="${fieldName}">Borrow more</button>`
+    ? `<button class="accept" data-live-borrow-more="${page.id}" data-live-debt-vault="${debtVault}" data-live-collateral-vault="${collateralVault}" data-live-account="${positionAccount}" data-live-field-name="${fieldName}">Borrow more</button>`
     : action === 'repay'
-    ? `<button class="primary-btn" data-live-repay="${page.id}" data-live-debt-vault="${debtVault}" data-live-collateral-vault="${collateralVault}" data-live-account="${positionAccount}" data-live-field-name="${fieldName}">Repay</button>`
+    ? `<button class="accept" data-live-repay="${page.id}" data-live-debt-vault="${debtVault}" data-live-collateral-vault="${collateralVault}" data-live-account="${positionAccount}" data-live-field-name="${fieldName}">Repay</button>`
     : action === 'supply'
-    ? `<button class="primary-btn" data-live-deposit="${page.id}" data-live-role="collateral" data-live-vault="${collateralVault}" data-live-debt-vault="${debtVault}" data-live-account="${positionAccount}" data-live-field-name="${fieldName}">Supply collateral</button>`
-    : `<button class="primary-btn" data-live-withdraw="${page.id}" data-live-role="collateral" data-live-vault="${collateralVault}" data-live-debt-vault="${debtVault}" data-live-account="${positionAccount}" data-live-field-name="${fieldName}">Withdraw collateral</button>`;
+    ? `<button class="accept" data-live-deposit="${page.id}" data-live-role="collateral" data-live-vault="${collateralVault}" data-live-debt-vault="${debtVault}" data-live-account="${positionAccount}" data-live-field-name="${fieldName}">Supply collateral</button>`
+    : `<button class="accept" data-live-withdraw="${page.id}" data-live-role="collateral" data-live-vault="${collateralVault}" data-live-debt-vault="${debtVault}" data-live-account="${positionAccount}" data-live-field-name="${fieldName}">Withdraw collateral</button>`;
   const maxButton = action === 'withdraw'
     ? `<button class="max-link" type="button" data-fill-max="${fieldName}" data-fill-value="${cleanAmountInput(position?.withdrawCapacityFormatted || '')}"><b>Max</b></button>`
     : action === 'repay'
@@ -1676,7 +1676,7 @@ function renderPortfolioAction(page) {
           </div>
           <div class="field-bottom"><span>$0</span>${maxButton}</div>
         </div>
-        <div class="tx-row">${button}</div>
+        <div class="tx-row single-action-row">${button}</div>
         ${actionNotices[page.id] ? `<div class="action-notice">${actionNotices[page.id]}</div>` : ''}
       </aside>
     </div>

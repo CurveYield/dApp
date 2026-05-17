@@ -110,6 +110,16 @@ test('portfolio action max buttons reuse Euler max-link styling', () => {
   assert.equal(renderPortfolioActionSource.includes('<b>Max</b>'), true);
 });
 
+test('portfolio action widgets use Euler primary button and full-width single action row', () => {
+  const actionStart = mainSource.indexOf('function renderPortfolioAction(page)');
+  const actionEnd = mainSource.indexOf('function currentSupplyApyTotal(page)');
+  const renderPortfolioActionSource = mainSource.slice(actionStart, actionEnd);
+  assert.equal(renderPortfolioActionSource.includes('class="primary-btn"'), false);
+  assert.equal(renderPortfolioActionSource.includes('class="accept" data-live-repay'), true);
+  assert.equal(renderPortfolioActionSource.includes('class="tx-row single-action-row"'), true);
+  assert.equal(stylesSource.includes('.single-action-row'), true);
+});
+
 test('IPOR is reachable from the brand menu but removed from the top Euler nav', () => {
   const headerStart = mainSource.indexOf('function renderHeader(page)');
   const headerEnd = mainSource.indexOf('function renderExploreGraph');

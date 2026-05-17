@@ -101,6 +101,15 @@ test('portfolio tabs use Euler naming for deposits and hide rewards', () => {
   assert.equal(renderPortfolioSource.includes('Rewards'), false);
 });
 
+test('portfolio action max buttons reuse Euler max-link styling', () => {
+  const actionStart = mainSource.indexOf('function renderPortfolioAction(page)');
+  const actionEnd = mainSource.indexOf('function currentSupplyApyTotal(page)');
+  const renderPortfolioActionSource = mainSource.slice(actionStart, actionEnd);
+  assert.equal(renderPortfolioActionSource.includes('<button type="button" data-fill-max'), false);
+  assert.equal(renderPortfolioActionSource.includes('<button class="max-link" type="button" data-fill-max'), true);
+  assert.equal(renderPortfolioActionSource.includes('<b>Max</b>'), true);
+});
+
 test('IPOR is reachable from the brand menu but removed from the top Euler nav', () => {
   const headerStart = mainSource.indexOf('function renderHeader(page)');
   const headerEnd = mainSource.indexOf('function renderExploreGraph');

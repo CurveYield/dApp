@@ -1625,12 +1625,12 @@ function renderPortfolioAction(page) {
     ? `<button class="primary-btn" data-live-deposit="${page.id}" data-live-role="collateral" data-live-vault="${collateralVault}" data-live-debt-vault="${debtVault}" data-live-account="${positionAccount}" data-live-field-name="${fieldName}">Supply collateral</button>`
     : `<button class="primary-btn" data-live-withdraw="${page.id}" data-live-role="collateral" data-live-vault="${collateralVault}" data-live-debt-vault="${debtVault}" data-live-account="${positionAccount}" data-live-field-name="${fieldName}">Withdraw collateral</button>`;
   const maxButton = action === 'withdraw'
-    ? `<button type="button" data-fill-max="${fieldName}" data-fill-value="${cleanAmountInput(position?.withdrawCapacityFormatted || '')}">Max</button>`
+    ? `<button class="max-link" type="button" data-fill-max="${fieldName}" data-fill-value="${cleanAmountInput(position?.withdrawCapacityFormatted || '')}"><b>Max</b></button>`
     : action === 'repay'
-    ? `<button type="button" data-fill-max="${fieldName}" data-fill-value="${cleanAmountInput(positionRepayMax(position, debtVault))}">Max</button>`
+    ? `<button class="max-link" type="button" data-fill-max="${fieldName}" data-fill-value="${cleanAmountInput(positionRepayMax(position, debtVault))}"><b>Max</b></button>`
     : action === 'supply'
-    ? `<button type="button" data-fill-max="${fieldName}" data-fill-vault="${collateralVault}">Max</button>`
-    : `<button type="button" data-fill-max="${fieldName}" data-fill-value="${cleanAmountInput(position?.borrowCapacityFormatted || '')}">Max</button>`;
+    ? `<button class="max-link" type="button" data-fill-max="${fieldName}" data-fill-vault="${collateralVault}"><b>Max</b></button>`
+    : `<button class="max-link" type="button" data-fill-max="${fieldName}" data-fill-value="${cleanAmountInput(position?.borrowCapacityFormatted || '')}"><b>Max</b></button>`;
   return `
     <div class="position-detail-title action-detail-title">
       <a class="back" href="#/portfolio-position-${market.id}-${page.positionIndex || 0}" data-back-button>&lsaquo;</a>

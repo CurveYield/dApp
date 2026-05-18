@@ -1,11 +1,11 @@
-import { CHAINS, TOKEN_ACTIONS, TOKEN_LOGOS, getChainById } from './config/assets.js?v=2026-05-09-live-value-audit-fix';
-import { DEFAULT_PAGE_ID, PAGES, TOKEN_DESCRIPTIONS, getPageById } from './config/pages.js?v=2026-05-09-live-value-audit-fix';
-import { combinedSupplyApy, maxRoeFromSupplyBorrowAndMultiplier, netApyFromSupplyAndBorrow } from './apyMath.js?v=2026-05-09-live-value-audit-fix';
+import { CHAINS, TOKEN_ACTIONS, TOKEN_LOGOS, getChainById } from './config/assets.js?v=2026-05-18-ipor-ethereum-vault';
+import { DEFAULT_PAGE_ID, PAGES, TOKEN_DESCRIPTIONS, getPageById } from './config/pages.js?v=2026-05-18-ipor-ethereum-vault';
+import { combinedSupplyApy, maxRoeFromSupplyBorrowAndMultiplier, netApyFromSupplyAndBorrow } from './apyMath.js?v=2026-05-18-ipor-ethereum-vault';
 import {
   irmBorrowApyAtUtilization,
   kinkIrmChartPoints,
   ltvMarkerPercent,
-} from './riskVisuals.js?v=2026-05-09-live-value-audit-fix';
+} from './riskVisuals.js?v=2026-05-18-ipor-ethereum-vault';
 import {
   DEFILLAMA_APY_STORAGE_KEY,
   assetApyKey,
@@ -14,7 +14,7 @@ import {
   loadBundledApy,
   mergeApySources,
   readStoredApy,
-} from './defillama.js?v=2026-05-09-live-value-audit-fix';
+} from './defillama.js?v=2026-05-18-ipor-ethereum-vault';
 import {
   borrowFromMarket,
   borrowMoreFromPosition,
@@ -41,20 +41,20 @@ import {
   withdrawCollateralFromPosition,
   withdrawFromVault,
   normalizeTransactionError,
-} from './eulerLive.js?v=2026-05-09-live-value-audit-fix';
+} from './eulerLive.js?v=2026-05-18-ipor-ethereum-vault';
 import {
   SIMULATION_STORAGE_KEY,
   applyEarnSimulation,
   applyMarketSimulation,
   formatAmount,
   readSimulationState,
-} from './simulation.js?v=2026-05-09-live-value-audit-fix';
+} from './simulation.js?v=2026-05-18-ipor-ethereum-vault';
 import {
   LIQUIDATION_CHAINS,
   LIQUIDATION_RISK_STORAGE_KEY,
   readStoredLiquidationState,
   refreshLiquidationRiskDashboard,
-} from './liquidationRisk.js?v=2026-05-09-live-value-audit-fix';
+} from './liquidationRisk.js?v=2026-05-18-ipor-ethereum-vault';
 import {
   LIVE_METRICS_STORAGE_KEY,
   isUnresolvedMetricValue,
@@ -62,7 +62,7 @@ import {
   loadRemoteLiveMetrics,
   mergeLiveMetricsSources,
   readLiveMetricsJson,
-} from './liveMetricsStore.js?v=2026-05-09-live-value-audit-fix';
+} from './liveMetricsStore.js?v=2026-05-18-ipor-ethereum-vault';
 
 const EXPLORE_PAGE = {
   id: 'explore',

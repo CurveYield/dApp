@@ -506,7 +506,7 @@ arbitrumCrvUsdEarnVault.exposures = [
   },
 ];
 
-export const DEFAULT_PAGE_ID = 'home';
+export const DEFAULT_PAGE_ID = 'ipor-crvusd-lp-vault';
 
 export const PAGES = [
   homePage,

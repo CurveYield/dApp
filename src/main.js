@@ -1,11 +1,11 @@
-import { CHAINS, TOKEN_ACTIONS, TOKEN_LOGOS, getChainById } from './config/assets.js?v=2026-05-18-ipor-ethereum-vault';
-import { DEFAULT_PAGE_ID, PAGES, TOKEN_DESCRIPTIONS, getPageById } from './config/pages.js?v=2026-05-18-ipor-ethereum-vault';
-import { combinedSupplyApy, maxRoeFromSupplyBorrowAndMultiplier, netApyFromSupplyAndBorrow } from './apyMath.js?v=2026-05-18-ipor-ethereum-vault';
+import { CHAINS, TOKEN_ACTIONS, TOKEN_LOGOS, getChainById } from './config/assets.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
+import { DEFAULT_PAGE_ID, PAGES, TOKEN_DESCRIPTIONS, getPageById } from './config/pages.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
+import { combinedSupplyApy, maxRoeFromSupplyBorrowAndMultiplier, netApyFromSupplyAndBorrow } from './apyMath.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
 import {
   irmBorrowApyAtUtilization,
   kinkIrmChartPoints,
   ltvMarkerPercent,
-} from './riskVisuals.js?v=2026-05-18-ipor-ethereum-vault';
+} from './riskVisuals.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
 import {
   DEFILLAMA_APY_STORAGE_KEY,
   assetApyKey,
@@ -14,7 +14,7 @@ import {
   loadBundledApy,
   mergeApySources,
   readStoredApy,
-} from './defillama.js?v=2026-05-18-ipor-ethereum-vault';
+} from './defillama.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
 import {
   borrowFromMarket,
   borrowMoreFromPosition,
@@ -41,20 +41,20 @@ import {
   withdrawCollateralFromPosition,
   withdrawFromVault,
   normalizeTransactionError,
-} from './eulerLive.js?v=2026-05-18-ipor-ethereum-vault';
+} from './eulerLive.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
 import {
   SIMULATION_STORAGE_KEY,
   applyEarnSimulation,
   applyMarketSimulation,
   formatAmount,
   readSimulationState,
-} from './simulation.js?v=2026-05-18-ipor-ethereum-vault';
+} from './simulation.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
 import {
   LIQUIDATION_CHAINS,
   LIQUIDATION_RISK_STORAGE_KEY,
   readStoredLiquidationState,
   refreshLiquidationRiskDashboard,
-} from './liquidationRisk.js?v=2026-05-18-ipor-ethereum-vault';
+} from './liquidationRisk.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
 import {
   LIVE_METRICS_STORAGE_KEY,
   isUnresolvedMetricValue,
@@ -62,7 +62,7 @@ import {
   loadRemoteLiveMetrics,
   mergeLiveMetricsSources,
   readLiveMetricsJson,
-} from './liveMetricsStore.js?v=2026-05-18-ipor-ethereum-vault';
+} from './liveMetricsStore.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
 
 const EXPLORE_PAGE = {
   id: 'explore',
@@ -305,7 +305,7 @@ function portfolioPositionPageForRoute(id) {
 }
 
 function currentRoute() {
-  const raw = window.location.hash.replace(/^#\/?/, '') || DEFAULT_PAGE_ID;
+  const raw = window.location.hash.replace(/^#\/?/, '').split('?')[0] || DEFAULT_PAGE_ID;
   const isDeveloper = raw.startsWith('dev/');
   const clean = isDeveloper ? raw.replace(/^dev\//, '') : raw;
   const [pageId, subview = 'pair'] = clean.split('/');

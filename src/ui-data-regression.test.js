@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const sourceDir = dirname(fileURLToPath(import.meta.url));
 const mainSource = readFileSync(join(sourceDir, 'main.js'), 'utf8');
 const eulerLiveSource = readFileSync(join(sourceDir, 'eulerLive.js'), 'utf8');
+const pagesSource = readFileSync(join(sourceDir, 'config', 'pages.js'), 'utf8');
 const stylesSource = readFileSync(join(sourceDir, 'styles.css'), 'utf8');
 
 test('portfolio UI does not show heuristic APY/ROE or Unknown placeholders', () => {
@@ -129,6 +130,15 @@ test('IPOR is reachable from the brand menu but removed from the top Euler nav',
   const mainNavSource = renderHeaderSource.slice(navStart, navEnd);
   assert.equal(renderHeaderSource.includes('href="#/ipor-crvusd-lp-vault"'), true);
   assert.equal(mainNavSource.includes('IPOR'), false);
+});
+
+test('IPOR crvUSD page targets the Ethereum CurveYield vault route', () => {
+  assert.equal(pagesSource.includes("chainId: 'ethereum'"), true);
+  assert.equal(pagesSource.includes('0xE31Aa86e21e420d03E52AaA06C349BDC525a664F'), true);
+  assert.equal(pagesSource.includes('Stake DAO OUSD/crvUSD Vault'), true);
+  assert.equal(pagesSource.includes('Curve OUSD/crvUSD'), true);
+  assert.equal(mainSource.includes('${chainLogo} ${chain.shortLabel}'), true);
+  assert.equal(mainSource.includes('${explorerLabel}'), true);
 });
 
 test('wallet cache can be reset after disconnect or account changes', () => {

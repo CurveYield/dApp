@@ -1,12 +1,12 @@
 {
   "ipor-crvusd-lp-vault": {
-    "assetAddress": "0x417ac0e078398c154edfadd9ef675d30be60af93",
-    "totalSupply": "9.18",
-    "totalAssets": "9.37",
-    "availableLiquidity": "9.37",
-    "supplyApy": "9.33%",
-    "performanceApy": "9.33%",
-    "updatedAt": 1778959609086
+    "assetAddress": "0xf939e0a03fb07f59a73314e73794be0e57ac1b4e",
+    "totalSupply": "0.00",
+    "totalAssets": "0.00",
+    "availableLiquidity": "0.00",
+    "supplyApy": "0.00%",
+    "performanceApy": "0.00%",
+    "updatedAt": 1779077546530
   },
   "market-1": {
     "collateralAssetAddress": "0x43e54c2e7b3e294de3a155785f52ab49d87b9922",

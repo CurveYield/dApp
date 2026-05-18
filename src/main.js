@@ -2680,6 +2680,7 @@ function renderIporMarketDetailsModal(page, apy, assets) {
   const assetNumber = Number(String(assets).replace(/[$,]/g, '')) || 0;
   const vaultAssets = `$${(assetNumber * 0.99).toFixed(2)}`;
   const idleAssets = `$${(assetNumber * 0.01).toFixed(2)}`;
+  const poolName = page.poolName || 'Curve LP';
   return `
     <div class="info-backdrop" data-close-info>
       <section class="info-modal ipor-details-modal ipor-full-details-modal" data-stop-close>
@@ -2699,7 +2700,7 @@ function renderIporMarketDetailsModal(page, apy, assets) {
             <span>Market</span><span>Supplied</span><span>Supply APY</span><span>Collateral</span><span>Collateral APY</span><span>Borrowed</span><span>Borrow APY</span><span>Net APY</span><span>Allocation</span>
           </div>
           <div class="ipor-modal-row ipor-credit-cols ipor-modal-leaf">
-            <span>Curve 4poolUSD-f</span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            <span>${poolName}</span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
             <span><strong>ERC4626 Vaults</strong><small><i class="ipor-dot purple"></i>99.00%</small></span><span>${vaultAssets}</span><span>${apy}</span><span></span><span></span><span>${apy}</span>
@@ -2708,7 +2709,7 @@ function renderIporMarketDetailsModal(page, apy, assets) {
             <span>Vault</span><span>Assets</span><span>Assets APY</span><span>Net APY</span><span>Allocation</span>
           </div>
           <div class="ipor-modal-row ipor-vault-cols ipor-modal-leaf">
-            <span><a href="${page.sourceAprUrl}" target="_blank" rel="noreferrer">Stake DAO Curve.fi Factory Plain Pool: 4pool Vault ↗</a></span><span>${vaultAssets}</span><span>${apy}</span><span>${apy}</span><span><i class="ipor-dot purple"></i>99.00%</span>
+            <span><a href="${page.sourceAprUrl}" target="_blank" rel="noreferrer">${page.strategyName} ↗</a></span><span>${vaultAssets}</span><span>${apy}</span><span>${apy}</span><span><i class="ipor-dot purple"></i>99.00%</span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
             <span><strong>ERC20 Tokens</strong><small><i class="ipor-dot navy"></i>1.00%</small></span><span>${idleAssets}</span><span>0.00%</span><span></span><span></span><span>0.00%</span>
@@ -2760,7 +2761,9 @@ function renderIporVault(page) {
   const iporAssetIcon = tokenLogo
     ? `<img class="ipor-token-logo" src="${tokenLogo}" alt="" />`
     : assetIcon(page.asset);
-  const baseLogo = `<img class="ipor-base-logo" src="./assets/logos/base.svg?v=2026-05-09-real-base-logo" alt="" />`;
+  const chain = getChainById(page.chainId);
+  const chainLogo = `<img class="ipor-base-logo" src="${chain.logo}" alt="" />`;
+  const explorerLabel = page.chainId === 'base' ? 'Basescan Page' : page.chainId === 'ethereum' ? 'Etherscan Page' : 'Explorer Page';
   return `
     <div class="ipor-shell">
       <header class="ipor-topbar">
@@ -2774,7 +2777,7 @@ function renderIporVault(page) {
           <a href="https://docs.curveyield.com" target="_blank" rel="noreferrer">CurveYield Docs</a>
         </nav>
         <div class="ipor-wallet-row">
-          <span class="ipor-pill">${baseLogo} Base</span>
+          <span class="ipor-pill">${chainLogo} ${chain.shortLabel}</span>
           <span class="ipor-pill">${connectedWalletAccount ? shortAddress(connectedWalletAccount) : 'Connect wallet'}</span>
         </div>
       </header>
@@ -2787,11 +2790,11 @@ function renderIporVault(page) {
               <h1>${page.title}</h1>
               <p>${page.subtitle}</p>
             </div>
-            <a class="ipor-page-button" href="${explorerAddressUrl(page, page.contractAddress)}" target="_blank" rel="noreferrer">Basescan Page</a>
+            <a class="ipor-page-button" href="${explorerAddressUrl(page, page.contractAddress)}" target="_blank" rel="noreferrer">${explorerLabel}</a>
             <a class="ipor-page-button" href="${page.externalUrl}" target="_blank" rel="noreferrer">IPOR Page</a>
           </div>
           <div class="ipor-badges">
-            <span>${baseLogo} Base</span>
+            <span>${chainLogo} ${chain.shortLabel}</span>
             <span>${iporAssetIcon} ${page.asset}</span>
             <span><img src="./assets/logos/curveyield-512.png" alt="" /> CurveYield</span>
           </div>
@@ -2829,6 +2832,7 @@ function renderIporVault(page) {
                   <div class="ipor-row-details">
                     ${metric('Allocation', '100.00%')}
                     ${metric('Strategy', page.strategyName)}
+                    ${metric('Pool', page.poolName || 'Curve LP')}
                     ${metric('APR source', 'StakeDAO')}
                     ${metric('Risk note', 'Single allocation')}
                   </div>

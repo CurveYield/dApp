@@ -2639,9 +2639,10 @@ function renderCurveYieldHome(page) {
 }
 
 function chartPoints(values, min, max) {
+  const range = max - min || 1;
   return values.map((value, index) => {
     const x = 42 + index * 54;
-    const y = 178 - ((value - min) / (max - min)) * 120;
+    const y = 178 - ((value - min) / range) * 120;
     return `${x},${Math.max(46, Math.min(178, y))}`;
   }).join(' ');
 }
@@ -2649,8 +2650,11 @@ function chartPoints(values, min, max) {
 function renderPerformanceChart(page) {
   const showApy = iporPerformanceModes.has('apy');
   const showShare = iporPerformanceModes.has('share');
-  const apyPoints = chartPoints([9.21, 9.29, 9.34, 9.31, 9.42, 9.36, 9.33], 9, 9.6);
-  const sharePoints = chartPoints([1.0000, 1.0002, 1.0005, 1.0008, 1.0011, 1.0016, 1.0020], 1, 1.0022);
+  const history = page.performanceHistory || {};
+  const apyPoints = chartPoints(history.apy || [0, 0, 0, 0, 0, 0, 0], history.apyMin ?? 0, history.apyMax ?? 1);
+  const sharePoints = chartPoints(history.share || [1, 1, 1, 1, 1, 1, 1], history.shareMin ?? 1, history.shareMax ?? 1.01);
+  const apyLabels = history.apyLabels || ['1.00%', '0.50%', '0.00%'];
+  const shareLabels = history.shareLabels || ['1.010', '1.005', '1.000'];
   return `
     <svg class="ipor-chart" viewBox="0 0 410 240" role="img" aria-label="Performance report">
       <g class="ipor-grid">
@@ -2660,12 +2664,12 @@ function renderPerformanceChart(page) {
       ${showApy ? `<polyline class="ipor-line ipor-line-apy" points="${apyPoints}" />` : ''}
       ${showShare ? `<polyline class="ipor-line ipor-line-share" points="${sharePoints}" />` : ''}
       <g class="ipor-axis">
-        <text x="8" y="47">9.60%</text>
-        <text x="8" y="137">9.30%</text>
-        <text x="8" y="184">9.00%</text>
-        <text x="374" y="47">1.002</text>
-        <text x="374" y="137">1.001</text>
-        <text x="374" y="184">1.000</text>
+        <text x="8" y="47">${apyLabels[0]}</text>
+        <text x="8" y="137">${apyLabels[1]}</text>
+        <text x="8" y="184">${apyLabels[2]}</text>
+        <text x="374" y="47">${shareLabels[0]}</text>
+        <text x="374" y="137">${shareLabels[1]}</text>
+        <text x="374" y="184">${shareLabels[2]}</text>
         <text x="42" y="220">02.05</text>
         <text x="150" y="220">04.05</text>
         <text x="258" y="220">06.05</text>
@@ -2679,6 +2683,7 @@ function renderIporMarketDetailsModal(page, apy, assets) {
   if (activeInfo !== 'ipor-market-details') return '';
   const assetNumber = Number(String(assets).replace(/[$,]/g, '')) || 0;
   const vaultAssets = `$${(assetNumber * 0.99).toFixed(2)}`;
+  const poolAssets = `$${(assetNumber * 0.99).toFixed(2)}`;
   const idleAssets = `$${(assetNumber * 0.01).toFixed(2)}`;
   const poolName = page.poolName || 'Curve LP';
   return `
@@ -2688,31 +2693,31 @@ function renderIporMarketDetailsModal(page, apy, assets) {
         <h2>All Markets</h2>
         <div class="ipor-modal-table">
           <div class="ipor-modal-row ipor-modal-head">
-            <span>Market</span><span>Assets</span><span>Assets APY</span><span>Liabilities</span><span>Liabilities APY</span><span>Net APY</span>
+            <span>Layer</span><span>Asset</span><span>Assets</span><span>APY</span><span>Allocation</span><span>Notes</span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
-            <span><strong>Credit Markets</strong><small>Effective Leverage 1.00x</small></span><span>$0</span><span>---</span><span>$0</span><span>---</span><span>0.00%</span>
+            <span><strong>Vault</strong><small>${page.shareSymbol || page.title}</small></span><span>${page.asset}</span><span>$${assets}</span><span>${apy}</span><span>100.00%</span><span>${page.depositRoute || page.strategyName}</span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
-            <span><span class="ipor-protocol-logo">Curve</span><strong>Curve</strong><small>0.00%</small></span><span>$0</span><span>---</span><span>$0</span><span>---</span><span>0.00%</span>
+            <span><span class="ipor-protocol-logo">Curve</span><strong>Curve LP</strong><small>OUSD/crvUSD</small></span><span>LP token</span><span>${poolAssets}</span><span>${apy}</span><span>99.00%</span><span>${poolName}</span>
           </div>
           <div class="ipor-modal-row ipor-modal-subhead ipor-credit-cols">
-            <span>Market</span><span>Supplied</span><span>Supply APY</span><span>Collateral</span><span>Collateral APY</span><span>Borrowed</span><span>Borrow APY</span><span>Net APY</span><span>Allocation</span>
+            <span>Curve pool</span><span>Input</span><span>Output</span><span>Pool APY</span><span>StakeDAO APY</span><span>Borrowed</span><span>Borrow APY</span><span>Net APY</span><span>Allocation</span>
           </div>
           <div class="ipor-modal-row ipor-credit-cols ipor-modal-leaf">
-            <span>${poolName}</span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            <span>${poolName}</span><span>${page.asset}</span><span>OUSD/crvUSD LP</span><span>0.00%</span><span>${apy}</span><span>$0</span><span>---</span><span>${apy}</span><span>99.00%</span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
-            <span><strong>ERC4626 Vaults</strong><small><i class="ipor-dot purple"></i>99.00%</small></span><span>${vaultAssets}</span><span>${apy}</span><span></span><span></span><span>${apy}</span>
+            <span><strong>ERC4626 Vault</strong><small><i class="ipor-dot purple"></i>99.00%</small></span><span>StakeDAO vault shares</span><span>${vaultAssets}</span><span>${apy}</span><span>99.00%</span><span>Holds the Curve LP token</span>
           </div>
           <div class="ipor-modal-row ipor-modal-subhead ipor-vault-cols">
-            <span>Vault</span><span>Assets</span><span>Assets APY</span><span>Net APY</span><span>Allocation</span>
+            <span>Vault</span><span>Underlying</span><span>Assets</span><span>Net APY</span><span>Allocation</span>
           </div>
           <div class="ipor-modal-row ipor-vault-cols ipor-modal-leaf">
-            <span><a href="${page.sourceAprUrl}" target="_blank" rel="noreferrer">${page.strategyName} ↗</a></span><span>${vaultAssets}</span><span>${apy}</span><span>${apy}</span><span><i class="ipor-dot purple"></i>99.00%</span>
+            <span><a href="${page.sourceAprUrl}" target="_blank" rel="noreferrer">${page.strategyName} ↗</a></span><span>${poolName}</span><span>${vaultAssets}</span><span>${apy}</span><span><i class="ipor-dot purple"></i>99.00%</span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
-            <span><strong>ERC20 Tokens</strong><small><i class="ipor-dot navy"></i>1.00%</small></span><span>${idleAssets}</span><span>0.00%</span><span></span><span></span><span>0.00%</span>
+            <span><strong>ERC20 Tokens</strong><small><i class="ipor-dot navy"></i>1.00%</small></span><span>${page.asset}</span><span>${idleAssets}</span><span>0.00%</span><span>1.00%</span><span>${page.idleAssetName || `Idle ${page.asset}`}</span>
           </div>
           <div class="ipor-modal-row ipor-token-cols ipor-modal-subhead">
             <span>Token</span><span>Balance</span><span>Price</span><span>Assets</span><span>Assets APY</span><span>Net APY</span><span>Allocation</span>
@@ -2726,23 +2731,29 @@ function renderIporMarketDetailsModal(page, apy, assets) {
   `;
 }
 
-function renderAllocationChart() {
+function renderAllocationChart(page) {
+  const history = page?.allocationHistory || {};
+  const values = history.values || [1, 0, 99];
+  const labels = history.labels || ['Idle', 'Curve LP', 'StakeDAO'];
+  const maxValue = Math.max(100, ...values);
+  const bars = values.map((value, index) => {
+    const x = 104 + index * 78;
+    const height = Math.max(4, (value / maxValue) * 140);
+    const y = 190 - height;
+    const mutedClass = index === 0 ? ' muted' : '';
+    return `<rect class="ipor-allocation-bar${mutedClass}" x="${x}" y="${y.toFixed(2)}" width="30" height="${height.toFixed(2)}" rx="4"/><text x="${x - 22}" y="220">${labels[index]}</text>`;
+  }).join('');
   return `
     <svg class="ipor-chart" viewBox="0 0 410 240" role="img" aria-label="Historical allocation">
       <g class="ipor-grid">
         <path d="M42 42H380M42 88H380M42 134H380M42 180H380"/>
         <path d="M42 42V190M96 42V190M150 42V190M204 42V190M258 42V190M312 42V190M366 42V190"/>
       </g>
-      <rect class="ipor-allocation-bar" x="176" y="50" width="30" height="140" rx="4"/>
-      <rect class="ipor-allocation-bar muted" x="318" y="178" width="30" height="12" rx="3"/>
+      ${bars}
       <g class="ipor-axis">
-        <text x="8" y="47">$10</text>
-        <text x="16" y="137">$5</text>
-        <text x="28" y="184">$0</text>
-        <text x="42" y="220">02.05</text>
-        <text x="150" y="220">04.05</text>
-        <text x="258" y="220">06.05</text>
-        <text x="352" y="220">08.05</text>
+        <text x="8" y="47">${history.maxValueLabel || '100%'}</text>
+        <text x="16" y="137">${history.midValueLabel || '50%'}</text>
+        <text x="28" y="184">${history.minValueLabel || '0%'}</text>
       </g>
     </svg>
   `;
@@ -2825,10 +2836,10 @@ function renderIporVault(page) {
             <section class="ipor-panel ipor-markets">
               <div class="ipor-panel-head"><h2>All Markets</h2><button data-info-kind="ipor-market-details">More details ↗</button></div>
               <div class="ipor-table">
-                <div class="head"><span>Market</span><span>Assets</span><span>Assets APY</span><span>Liabilities</span><span>Liabilities APY</span><span>Net APY</span></div>
-                <div class="row strong"><span>Credit Markets<small>Effective Leverage 1.00x</small></span><span>$${assets}</span><span>${apy}</span><span>$0</span><span>---</span><span>${apy}</span></div>
+                <div class="head"><span>Route</span><span>Assets</span><span>APY</span><span>Input</span><span>Output</span><span>Allocation</span></div>
+                <div class="row strong"><span>${page.shareSymbol || page.title}<small>${page.network}</small></span><span>$${assets}</span><span>${apy}</span><span>${page.asset}</span><span>${page.shareSymbol || 'Vault shares'}</span><span>100.00%</span></div>
                 <details class="ipor-expand-row" open>
-                  <summary class="row"><span>Curve<small>100.00%</small></span><span>$${assets}</span><span>${apy}</span><span>$0</span><span>---</span><span>${apy}</span></summary>
+                  <summary class="row"><span>StakeDAO<small>${page.strategyName}</small></span><span>$${assets}</span><span>${apy}</span><span>${page.poolName || 'Curve LP'}</span><span>StakeDAO vault shares</span><span>99.00%</span></summary>
                   <div class="ipor-row-details">
                     ${metric('Allocation', '100.00%')}
                     ${metric('Strategy', page.strategyName)}
@@ -2837,7 +2848,7 @@ function renderIporVault(page) {
                     ${metric('Risk note', 'Single allocation')}
                   </div>
                 </details>
-                <div class="row"><span>ERC4626 Vaults<small>0.00%</small></span><span>$0</span><span>0.00%</span><span></span><span></span><span>0.00%</span></div>
+                <div class="row"><span>${page.idleAssetName || `Idle ${page.asset}`}<small>withdrawal buffer</small></span><span>$${(Number(String(assets).replace(/[$,]/g, '')) * 0.01).toFixed(2)}</span><span>0.00%</span><span>${page.asset}</span><span>${page.asset}</span><span>1.00%</span></div>
               </div>
             </section>
           </section>
@@ -2848,8 +2859,8 @@ function renderIporVault(page) {
             </div>
             <div class="ipor-action-card">
               <h2>↓ ${withdrawMode ? 'Withdraw' : 'Deposit'}</h2>
-              <p>Withdraw: Scheduled (12 hours) ⓘ</p>
-              <a href="${page.externalUrl}" target="_blank" rel="noreferrer">Learn about the fees ↗</a>
+              <p>${page.withdrawalLabel || 'Withdraw through vault'}</p>
+              <a href="${page.externalUrl}" target="_blank" rel="noreferrer">${page.feeLabel || 'Learn about the fees'} ↗</a>
               <div class="ipor-input-card">
                 <div><span>Amount</span><small>Available: ${vaultBalance}</small></div>
                 <label>

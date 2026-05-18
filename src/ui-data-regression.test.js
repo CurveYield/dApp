@@ -135,10 +135,15 @@ test('IPOR is reachable from the brand menu but removed from the top Euler nav',
 test('IPOR crvUSD page targets the Ethereum CurveYield vault route', () => {
   assert.equal(pagesSource.includes("chainId: 'ethereum'"), true);
   assert.equal(pagesSource.includes('0xE31Aa86e21e420d03E52AaA06C349BDC525a664F'), true);
+  assert.equal(pagesSource.includes("shareSymbol: 'cy-crvUSD'"), true);
+  assert.equal(pagesSource.includes('crvUSD -> Curve OUSD/crvUSD LP -> StakeDAO OUSD/crvUSD Vault'), true);
   assert.equal(pagesSource.includes('Stake DAO OUSD/crvUSD Vault'), true);
   assert.equal(pagesSource.includes('Curve OUSD/crvUSD'), true);
   assert.equal(mainSource.includes('${chainLogo} ${chain.shortLabel}'), true);
   assert.equal(mainSource.includes('${explorerLabel}'), true);
+  assert.equal(mainSource.includes('Credit Markets<small>Effective Leverage 1.00x'), false);
+  assert.equal(mainSource.includes('Curve 4poolUSD-f'), false);
+  assert.equal(mainSource.includes('Withdraw: Scheduled (12 hours)'), false);
 });
 
 test('wallet cache can be reset after disconnect or account changes', () => {

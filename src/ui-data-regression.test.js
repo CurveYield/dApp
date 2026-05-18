@@ -150,6 +150,17 @@ test('IPOR crvUSD page targets the Ethereum CurveYield vault route', () => {
   assert.equal(mainSource.includes('Withdraw: Scheduled (12 hours)'), false);
 });
 
+test('IPOR crvUSD page uses live route yield sources for vault and collateral APRs', () => {
+  assert.equal(pagesSource.includes("pool: 'aeb52bc8-2eb0-49d9-8571-28290c39a182'"), true);
+  assert.equal(pagesSource.includes("pool: '3811321b-c619-4c3b-bc69-3fe1f58391c6'"), true);
+  assert.equal(mainSource.includes('function iporStrategyApy(page)'), true);
+  assert.equal(mainSource.includes('function iporCurvePoolApy(page)'), true);
+  assert.equal(mainSource.includes('fetchPoolYieldApys({'), true);
+  assert.equal(mainSource.includes("metric('Curve pool APR', poolApy)"), true);
+  assert.equal(mainSource.includes("metric('StakeDAO vault APR', strategyApy)"), true);
+  assert.equal(mainSource.includes("iporMetric('APY', strategyApy"), true);
+});
+
 test('wallet cache can be reset after disconnect or account changes', () => {
   assert.equal(eulerLiveSource.includes('export function resetWalletConnectionCache()'), true);
   assert.equal(eulerLiveSource.includes('export async function requestWalletAccount'), true);

@@ -1,20 +1,22 @@
-import { CHAINS, TOKEN_ACTIONS, TOKEN_LOGOS, getChainById } from './config/assets.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
-import { DEFAULT_PAGE_ID, PAGES, TOKEN_DESCRIPTIONS, getPageById } from './config/pages.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
-import { combinedSupplyApy, maxRoeFromSupplyBorrowAndMultiplier, netApyFromSupplyAndBorrow } from './apyMath.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
+import { CHAINS, TOKEN_ACTIONS, TOKEN_LOGOS, getChainById } from './config/assets.js?v=2026-05-18-ipor-live-apy';
+import { DEFAULT_PAGE_ID, PAGES, TOKEN_DESCRIPTIONS, getPageById } from './config/pages.js?v=2026-05-18-ipor-live-apy';
+import { combinedSupplyApy, maxRoeFromSupplyBorrowAndMultiplier, netApyFromSupplyAndBorrow } from './apyMath.js?v=2026-05-18-ipor-live-apy';
 import {
   irmBorrowApyAtUtilization,
   kinkIrmChartPoints,
   ltvMarkerPercent,
-} from './riskVisuals.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
+} from './riskVisuals.js?v=2026-05-18-ipor-live-apy';
 import {
   DEFILLAMA_APY_STORAGE_KEY,
   assetApyKey,
   createRequestLimiter,
   fetchAssetApys,
+  fetchPoolYieldApys,
   loadBundledApy,
   mergeApySources,
+  poolYieldKey,
   readStoredApy,
-} from './defillama.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
+} from './defillama.js?v=2026-05-18-ipor-live-apy';
 import {
   borrowFromMarket,
   borrowMoreFromPosition,
@@ -41,20 +43,20 @@ import {
   withdrawCollateralFromPosition,
   withdrawFromVault,
   normalizeTransactionError,
-} from './eulerLive.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
+} from './eulerLive.js?v=2026-05-18-ipor-live-apy';
 import {
   SIMULATION_STORAGE_KEY,
   applyEarnSimulation,
   applyMarketSimulation,
   formatAmount,
   readSimulationState,
-} from './simulation.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
+} from './simulation.js?v=2026-05-18-ipor-live-apy';
 import {
   LIQUIDATION_CHAINS,
   LIQUIDATION_RISK_STORAGE_KEY,
   readStoredLiquidationState,
   refreshLiquidationRiskDashboard,
-} from './liquidationRisk.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
+} from './liquidationRisk.js?v=2026-05-18-ipor-live-apy';
 import {
   LIVE_METRICS_STORAGE_KEY,
   isUnresolvedMetricValue,
@@ -62,7 +64,7 @@ import {
   loadRemoteLiveMetrics,
   mergeLiveMetricsSources,
   readLiveMetricsJson,
-} from './liveMetricsStore.js?v=2026-05-18-ipor-ethereum-vault-root-fix';
+} from './liveMetricsStore.js?v=2026-05-18-ipor-live-apy';
 
 const EXPLORE_PAGE = {
   id: 'explore',
@@ -927,6 +929,17 @@ function apyAssets() {
   return [...seen.values()];
 }
 
+function apyYieldSources() {
+  const seen = new Map();
+  for (const page of PAGES) {
+    for (const source of page.yieldSources || []) {
+      const key = poolYieldKey(source);
+      if (!seen.has(key)) seen.set(key, source);
+    }
+  }
+  return [...seen.values()];
+}
+
 function intrinsicApy(symbol) {
   return intrinsicApyFor(selectedChainId, symbol);
 }
@@ -945,21 +958,49 @@ function intrinsicApySourceFor(chainId, symbol) {
   return apyState.sources?.[key] || apyState.values?.[key]?.source || 'pending';
 }
 
+function iporYieldSourceByKind(page, kind) {
+  return (page.yieldSources || []).find((source) => source.kind === kind) || null;
+}
+
+function iporRouteApy(page, kind) {
+  const source = iporYieldSourceByKind(page, kind);
+  if (!source) return page.strategyApr || '0.00%';
+  return apyState.values?.[poolYieldKey(source)]?.formatted || page.strategyApr || '0.00%';
+}
+
+function iporStrategyApy(page) {
+  return iporRouteApy(page, 'strategy');
+}
+
+function iporCurvePoolApy(page) {
+  return iporRouteApy(page, 'curve-pool');
+}
+
 function refreshApyOnce() {
   if (apyRefreshStarted) return;
   apyRefreshStarted = true;
 
-  fetchAssetApys({
-    assets: apyAssets(),
-    cachedSources: apyState.sources,
-    limitedFetch,
-  }).then((fresh) => {
+  Promise.all([
+    fetchAssetApys({
+      assets: apyAssets(),
+      cachedSources: apyState.sources,
+      limitedFetch,
+    }),
+    fetchPoolYieldApys({
+      sources: apyYieldSources(),
+      limitedFetch,
+    }),
+  ]).then(([freshAssets, freshPools]) => {
     const nextState = {
       updatedAt: Date.now(),
-      sources: fresh.sources,
+      sources: {
+        ...freshAssets.sources,
+        ...freshPools.sources,
+      },
       values: {
         ...apyState.values,
-        ...fresh.values,
+        ...freshAssets.values,
+        ...freshPools.values,
       },
     };
     apyState = nextState;
@@ -2679,7 +2720,7 @@ function renderPerformanceChart(page) {
   `;
 }
 
-function renderIporMarketDetailsModal(page, apy, assets) {
+function renderIporMarketDetailsModal(page, strategyApy, poolApy, assets) {
   if (activeInfo !== 'ipor-market-details') return '';
   const assetNumber = Number(String(assets).replace(/[$,]/g, '')) || 0;
   const vaultAssets = `$${(assetNumber * 0.99).toFixed(2)}`;
@@ -2696,25 +2737,25 @@ function renderIporMarketDetailsModal(page, apy, assets) {
             <span>Layer</span><span>Asset</span><span>Assets</span><span>APY</span><span>Allocation</span><span>Notes</span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
-            <span><strong>Vault</strong><small>${page.shareSymbol || page.title}</small></span><span>${page.asset}</span><span>$${assets}</span><span>${apy}</span><span>100.00%</span><span>${page.depositRoute || page.strategyName}</span>
+            <span><strong>Vault</strong><small>${page.shareSymbol || page.title}</small></span><span>${page.asset}</span><span>$${assets}</span><span>${strategyApy}</span><span>100.00%</span><span>${page.depositRoute || page.strategyName}</span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
-            <span><span class="ipor-protocol-logo">Curve</span><strong>Curve LP</strong><small>OUSD/crvUSD</small></span><span>LP token</span><span>${poolAssets}</span><span>${apy}</span><span>99.00%</span><span>${poolName}</span>
+            <span><span class="ipor-protocol-logo">Curve</span><strong>Curve LP</strong><small>OUSD/crvUSD</small></span><span>LP token</span><span>${poolAssets}</span><span>${poolApy}</span><span>99.00%</span><span>${poolName}</span>
           </div>
           <div class="ipor-modal-row ipor-modal-subhead ipor-credit-cols">
             <span>Curve pool</span><span>Input</span><span>Output</span><span>Pool APY</span><span>StakeDAO APY</span><span>Borrowed</span><span>Borrow APY</span><span>Net APY</span><span>Allocation</span>
           </div>
           <div class="ipor-modal-row ipor-credit-cols ipor-modal-leaf">
-            <span>${poolName}</span><span>${page.asset}</span><span>OUSD/crvUSD LP</span><span>0.00%</span><span>${apy}</span><span>$0</span><span>---</span><span>${apy}</span><span>99.00%</span>
+            <span>${poolName}</span><span>${page.asset}</span><span>OUSD/crvUSD LP</span><span>${poolApy}</span><span>${strategyApy}</span><span>$0</span><span>---</span><span>${strategyApy}</span><span>99.00%</span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
-            <span><strong>ERC4626 Vault</strong><small><i class="ipor-dot purple"></i>99.00%</small></span><span>StakeDAO vault shares</span><span>${vaultAssets}</span><span>${apy}</span><span>99.00%</span><span>Holds the Curve LP token</span>
+            <span><strong>ERC4626 Vault</strong><small><i class="ipor-dot purple"></i>99.00%</small></span><span>StakeDAO vault shares</span><span>${vaultAssets}</span><span>${strategyApy}</span><span>99.00%</span><span>Holds the Curve LP token</span>
           </div>
           <div class="ipor-modal-row ipor-modal-subhead ipor-vault-cols">
             <span>Vault</span><span>Underlying</span><span>Assets</span><span>Net APY</span><span>Allocation</span>
           </div>
           <div class="ipor-modal-row ipor-vault-cols ipor-modal-leaf">
-            <span><a href="${page.sourceAprUrl}" target="_blank" rel="noreferrer">${page.strategyName} ↗</a></span><span>${poolName}</span><span>${vaultAssets}</span><span>${apy}</span><span><i class="ipor-dot purple"></i>99.00%</span>
+            <span><a href="${page.sourceAprUrl}" target="_blank" rel="noreferrer">${page.strategyName} ↗</a></span><span>${poolName}</span><span>${vaultAssets}</span><span>${strategyApy}</span><span><i class="ipor-dot purple"></i>99.00%</span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
             <span><strong>ERC20 Tokens</strong><small><i class="ipor-dot navy"></i>1.00%</small></span><span>${page.asset}</span><span>${idleAssets}</span><span>0.00%</span><span>1.00%</span><span>${page.idleAssetName || `Idle ${page.asset}`}</span>
@@ -2761,7 +2802,8 @@ function renderAllocationChart(page) {
 
 function renderIporVault(page) {
   const notice = actionNotices[page.id] || '';
-  const apy = contractValue(page, 'supplyApy') || page.strategyApr;
+  const strategyApy = iporStrategyApy(page);
+  const poolApy = iporCurvePoolApy(page);
   const assets = contractValue(page, 'totalAssets') || page.totalValueManaged;
   const totalSupply = contractValue(page, 'totalSupply') || page.totalValueLocked;
   const withdrawMode = currentActionMode(page.id, 'supply', 'deposit') === 'withdraw';
@@ -2814,7 +2856,7 @@ function renderIporVault(page) {
           <section class="ipor-main">
             <div class="ipor-tabs"><button class="active">Overview</button></div>
             <div class="ipor-stats">
-              ${iporMetric('APY', apy, 'StakeDAO strategy APR')}
+              ${iporMetric('APY', strategyApy, 'StakeDAO strategy APR')}
               ${iporMetric('Total Value Managed', `$${assets}`, `${assets} ${page.asset}`)}
               ${iporMetric('Total Value Locked', `$${totalSupply}`, `${totalSupply} ${page.asset}`)}
             </div>
@@ -2837,14 +2879,15 @@ function renderIporVault(page) {
               <div class="ipor-panel-head"><h2>All Markets</h2><button data-info-kind="ipor-market-details">More details ↗</button></div>
               <div class="ipor-table">
                 <div class="head"><span>Route</span><span>Assets</span><span>APY</span><span>Input</span><span>Output</span><span>Allocation</span></div>
-                <div class="row strong"><span>${page.shareSymbol || page.title}<small>${page.network}</small></span><span>$${assets}</span><span>${apy}</span><span>${page.asset}</span><span>${page.shareSymbol || 'Vault shares'}</span><span>100.00%</span></div>
+                <div class="row strong"><span>${page.shareSymbol || page.title}<small>${page.network}</small></span><span>$${assets}</span><span>${strategyApy}</span><span>${page.asset}</span><span>${page.shareSymbol || 'Vault shares'}</span><span>100.00%</span></div>
                 <details class="ipor-expand-row" open>
-                  <summary class="row"><span>StakeDAO<small>${page.strategyName}</small></span><span>$${assets}</span><span>${apy}</span><span>${page.poolName || 'Curve LP'}</span><span>StakeDAO vault shares</span><span>99.00%</span></summary>
+                  <summary class="row"><span>StakeDAO<small>${page.strategyName}</small></span><span>$${assets}</span><span>${strategyApy}</span><span>${page.poolName || 'Curve LP'}</span><span>StakeDAO vault shares</span><span>99.00%</span></summary>
                   <div class="ipor-row-details">
                     ${metric('Allocation', '100.00%')}
                     ${metric('Strategy', page.strategyName)}
                     ${metric('Pool', page.poolName || 'Curve LP')}
-                    ${metric('APR source', 'StakeDAO')}
+                    ${metric('Curve pool APR', poolApy)}
+                    ${metric('StakeDAO vault APR', strategyApy)}
                     ${metric('Risk note', 'Single allocation')}
                   </div>
                 </details>
@@ -2881,7 +2924,7 @@ function renderIporVault(page) {
             <div class="ipor-side-card">${metric('My Deposit', withdrawCapacityFor(page.contractAddress, page.asset))}</div>
           </aside>
         </div>
-        ${renderIporMarketDetailsModal(page, apy, assets)}
+        ${renderIporMarketDetailsModal(page, strategyApy, poolApy, assets)}
       </main>
     </div>
   `;

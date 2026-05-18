@@ -1,11 +1,11 @@
-import { CHAINS, TOKEN_ACTIONS, TOKEN_LOGOS, getChainById } from './config/assets.js?v=2026-05-18-ipor-live-apy';
-import { DEFAULT_PAGE_ID, PAGES, TOKEN_DESCRIPTIONS, getPageById } from './config/pages.js?v=2026-05-18-ipor-live-apy';
-import { combinedSupplyApy, maxRoeFromSupplyBorrowAndMultiplier, netApyFromSupplyAndBorrow } from './apyMath.js?v=2026-05-18-ipor-live-apy';
+import { CHAINS, TOKEN_ACTIONS, TOKEN_LOGOS, getChainById } from './config/assets.js?v=2026-05-18-ipor-chart-layout';
+import { DEFAULT_PAGE_ID, PAGES, TOKEN_DESCRIPTIONS, getPageById } from './config/pages.js?v=2026-05-18-ipor-chart-layout';
+import { combinedSupplyApy, maxRoeFromSupplyBorrowAndMultiplier, netApyFromSupplyAndBorrow } from './apyMath.js?v=2026-05-18-ipor-chart-layout';
 import {
   irmBorrowApyAtUtilization,
   kinkIrmChartPoints,
   ltvMarkerPercent,
-} from './riskVisuals.js?v=2026-05-18-ipor-live-apy';
+} from './riskVisuals.js?v=2026-05-18-ipor-chart-layout';
 import {
   DEFILLAMA_APY_STORAGE_KEY,
   assetApyKey,
@@ -16,7 +16,7 @@ import {
   mergeApySources,
   poolYieldKey,
   readStoredApy,
-} from './defillama.js?v=2026-05-18-ipor-live-apy';
+} from './defillama.js?v=2026-05-18-ipor-chart-layout';
 import {
   borrowFromMarket,
   borrowMoreFromPosition,
@@ -43,20 +43,20 @@ import {
   withdrawCollateralFromPosition,
   withdrawFromVault,
   normalizeTransactionError,
-} from './eulerLive.js?v=2026-05-18-ipor-live-apy';
+} from './eulerLive.js?v=2026-05-18-ipor-chart-layout';
 import {
   SIMULATION_STORAGE_KEY,
   applyEarnSimulation,
   applyMarketSimulation,
   formatAmount,
   readSimulationState,
-} from './simulation.js?v=2026-05-18-ipor-live-apy';
+} from './simulation.js?v=2026-05-18-ipor-chart-layout';
 import {
   LIQUIDATION_CHAINS,
   LIQUIDATION_RISK_STORAGE_KEY,
   readStoredLiquidationState,
   refreshLiquidationRiskDashboard,
-} from './liquidationRisk.js?v=2026-05-18-ipor-live-apy';
+} from './liquidationRisk.js?v=2026-05-18-ipor-chart-layout';
 import {
   LIVE_METRICS_STORAGE_KEY,
   isUnresolvedMetricValue,
@@ -64,7 +64,7 @@ import {
   loadRemoteLiveMetrics,
   mergeLiveMetricsSources,
   readLiveMetricsJson,
-} from './liveMetricsStore.js?v=2026-05-18-ipor-live-apy';
+} from './liveMetricsStore.js?v=2026-05-18-ipor-chart-layout';
 
 const EXPLORE_PAGE = {
   id: 'explore',
@@ -2688,14 +2688,28 @@ function chartPoints(values, min, max) {
   }).join(' ');
 }
 
-function renderPerformanceChart(page) {
+function numericDisplayValue(value, fallback = 0) {
+  const number = Number(String(value ?? '').replace(/[$,%x,]/g, '').trim());
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function flatSeries(value, length = 7) {
+  return Array.from({ length }, () => value);
+}
+
+function renderPerformanceChart(page, strategyApy, sharePrice) {
   const showApy = iporPerformanceModes.has('apy');
   const showShare = iporPerformanceModes.has('share');
-  const history = page.performanceHistory || {};
-  const apyPoints = chartPoints(history.apy || [0, 0, 0, 0, 0, 0, 0], history.apyMin ?? 0, history.apyMax ?? 1);
-  const sharePoints = chartPoints(history.share || [1, 1, 1, 1, 1, 1, 1], history.shareMin ?? 1, history.shareMax ?? 1.01);
-  const apyLabels = history.apyLabels || ['1.00%', '0.50%', '0.00%'];
-  const shareLabels = history.shareLabels || ['1.010', '1.005', '1.000'];
+  const liveApy = numericDisplayValue(strategyApy, 0);
+  const liveShare = numericDisplayValue(sharePrice, 1);
+  const apyMax = Math.max(1, liveApy * 1.15);
+  const shareRange = 0.005;
+  const shareMin = Math.max(0, liveShare - shareRange);
+  const shareMax = liveShare + shareRange;
+  const apyPoints = chartPoints(flatSeries(liveApy), 0, apyMax);
+  const sharePoints = chartPoints(flatSeries(liveShare), shareMin, shareMax);
+  const apyLabels = [`${apyMax.toFixed(2)}%`, `${(apyMax / 2).toFixed(2)}%`, '0.00%'];
+  const shareLabels = [shareMax.toFixed(6), liveShare.toFixed(6), shareMin.toFixed(6)];
   return `
     <svg class="ipor-chart" viewBox="0 0 410 240" role="img" aria-label="Performance report">
       <g class="ipor-grid">
@@ -2711,10 +2725,10 @@ function renderPerformanceChart(page) {
         <text x="374" y="47">${shareLabels[0]}</text>
         <text x="374" y="137">${shareLabels[1]}</text>
         <text x="374" y="184">${shareLabels[2]}</text>
-        <text x="42" y="220">02.05</text>
-        <text x="150" y="220">04.05</text>
-        <text x="258" y="220">06.05</text>
-        <text x="352" y="220">08.05</text>
+        <text x="42" y="220">Live</text>
+        <text x="150" y="220">Live</text>
+        <text x="258" y="220">Live</text>
+        <text x="352" y="220">Now</text>
       </g>
     </svg>
   `;
@@ -2804,6 +2818,7 @@ function renderIporVault(page) {
   const notice = actionNotices[page.id] || '';
   const strategyApy = iporStrategyApy(page);
   const poolApy = iporCurvePoolApy(page);
+  const sharePrice = contractValue(page, 'shareTokenExchangeRate') || '1.000000';
   const assets = contractValue(page, 'totalAssets') || page.totalValueManaged;
   const totalSupply = contractValue(page, 'totalSupply') || page.totalValueLocked;
   const withdrawMode = currentActionMode(page.id, 'supply', 'deposit') === 'withdraw';
@@ -2863,9 +2878,9 @@ function renderIporVault(page) {
             <div class="ipor-charts">
               <section class="ipor-panel">
                 <div class="ipor-panel-head"><h2>Performance Report</h2><span>↗</span></div>
-                ${renderPerformanceChart(page)}
+                ${renderPerformanceChart(page, strategyApy, sharePrice)}
                 <div class="ipor-chart-legend">
-                  <button class="${iporPerformanceModes.has('apy') ? 'active' : ''}" data-ipor-chart="apy"><span class="${iporPerformanceModes.has('apy') ? 'checked' : ''}"></span>Strategy APY</button>
+                  <button class="${iporPerformanceModes.has('apy') ? 'active' : ''}" data-ipor-chart="apy"><span class="${iporPerformanceModes.has('apy') ? 'checked' : ''}"></span>Strategy APR</button>
                   <button class="${iporPerformanceModes.has('share') ? 'active' : ''}" data-ipor-chart="share"><span class="${iporPerformanceModes.has('share') ? 'checked' : ''}"></span>Share price</button>
                 </div>
               </section>

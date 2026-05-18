@@ -582,6 +582,19 @@ button {
   font-weight: 700;
 }
 
+.ipor-table .row > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.ipor-table .row > span:nth-child(4),
+.ipor-table .row > span:nth-child(5) {
+  font-size: 12px;
+  line-height: 16px;
+  overflow-wrap: normal;
+}
+
 .ipor-table .row strong {
   font-size: 14px;
   line-height: 18px;
@@ -607,14 +620,41 @@ button {
 
 .ipor-row-details {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  padding: 0 24px 18px 24px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 0 24px 20px 24px;
   color: #9ca8b8;
 }
 
 .ipor-row-details .metric {
-  min-height: 52px;
+  display: grid;
+  align-items: start;
+  justify-content: start;
+  min-height: 0;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid #252e38;
+  border-radius: 10px;
+  background: rgba(9, 14, 20, 0.34);
+}
+
+.ipor-row-details .metric span,
+.ipor-row-details .metric strong {
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.ipor-row-details .metric span {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.ipor-row-details .metric strong {
+  font-size: 13px;
+  line-height: 17px;
 }
 
 .ipor-table .row span:first-child {

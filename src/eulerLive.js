@@ -2113,6 +2113,7 @@ export async function fetchLivePageMetrics(page, rpcUrl = null) {
       totalSupply: vault.totalSupply === null ? page.totalSupply || '0.00' : formatUnits(vault.totalSupply, vault.shareDecimals, 2),
       totalAssets: vault.totalAssets === null ? page.totalAssets || '0.00' : formatUnits(vault.totalAssets, vault.decimals, 2),
       availableLiquidity: vault.totalAssets === null ? page.totalValueLocked || '0.00' : formatUnits(vault.totalAssets, vault.decimals, 2),
+      shareTokenExchangeRate: formatShareExchangeRate({ totalAssets: vault.totalAssets, totalSupply: vault.totalSupply, decimals: vault.decimals, shareDecimals: vault.shareDecimals }),
       supplyApy: page.strategyApr || '9.33%',
       performanceApy: page.strategyApr || '9.33%',
     };

@@ -161,6 +161,19 @@ test('IPOR crvUSD page uses live route yield sources for vault and collateral AP
   assert.equal(mainSource.includes("iporMetric('APY', strategyApy"), true);
 });
 
+test('IPOR market detail rows wrap long values instead of overflowing', () => {
+  assert.equal(stylesSource.includes('.ipor-row-details .metric strong'), true);
+  assert.equal(stylesSource.includes('overflow-wrap: anywhere'), true);
+  assert.equal(stylesSource.includes('word-break: normal'), true);
+});
+
+test('IPOR performance chart uses live APY and share price values', () => {
+  assert.equal(mainSource.includes('function renderPerformanceChart(page, strategyApy, sharePrice)'), true);
+  assert.equal(mainSource.includes("const sharePrice = contractValue(page, 'shareTokenExchangeRate') || '1.000000'"), true);
+  assert.equal(mainSource.includes('renderPerformanceChart(page, strategyApy, sharePrice)'), true);
+  assert.equal(eulerLiveSource.includes('shareTokenExchangeRate: formatShareExchangeRate'), true);
+});
+
 test('wallet cache can be reset after disconnect or account changes', () => {
   assert.equal(eulerLiveSource.includes('export function resetWalletConnectionCache()'), true);
   assert.equal(eulerLiveSource.includes('export async function requestWalletAccount'), true);

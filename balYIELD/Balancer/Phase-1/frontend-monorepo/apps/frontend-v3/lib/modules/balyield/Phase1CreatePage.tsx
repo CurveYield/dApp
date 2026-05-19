@@ -311,7 +311,7 @@ export function Phase1CreatePage() {
   }
 
   return (
-    <Container maxW="container.lg" py={{ base: 'md', md: 'xl' }}>
+    <Container maxW="container.lg" pb={{ base: 'md', md: 'xl' }} pt={{ base: '96px', md: '104px' }}>
       <Stack gap="lg">
         <HStack justify="space-between">
           <Heading color="font.highlight" size="lg">

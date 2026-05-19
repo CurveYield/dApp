@@ -24,7 +24,7 @@ export function Phase1PoolPage() {
   const tokens = Object.values(phase1Tokens)
 
   return (
-    <Container maxW="container.xl" py={{ base: 'md', md: 'xl' }}>
+    <Container maxW="container.xl" pb={{ base: 'md', md: 'xl' }} pt={{ base: '96px', md: '104px' }}>
       <Stack gap="lg">
         <HStack justify="space-between">
           <Box>

@@ -290,7 +290,7 @@ export function Phase1SwapPage() {
   }
 
   return (
-    <Container maxW="container.md" py={{ base: 'md', md: 'xl' }}>
+    <Container maxW="container.md" pb={{ base: 'md', md: 'xl' }} pt={{ base: '96px', md: '104px' }}>
       <Card>
         <CardBody>
           <Stack gap="md">

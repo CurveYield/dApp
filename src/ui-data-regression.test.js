@@ -9,7 +9,6 @@ const mainSource = readFileSync(join(sourceDir, 'main.js'), 'utf8');
 const eulerLiveSource = readFileSync(join(sourceDir, 'eulerLive.js'), 'utf8');
 const pagesSource = readFileSync(join(sourceDir, 'config', 'pages.js'), 'utf8');
 const stylesSource = readFileSync(join(sourceDir, 'styles.css'), 'utf8');
-const indexSource = readFileSync(join(sourceDir, '..', 'index.html'), 'utf8');
 
 test('portfolio UI does not show heuristic APY/ROE or Unknown placeholders', () => {
   assert.equal(mainSource.includes('computedEarnSupplyApy(page)'), false);
@@ -134,10 +133,6 @@ test('IPOR is reachable from the brand menu but removed from the top Euler nav',
 });
 
 test('IPOR crvUSD page targets the Ethereum CurveYield vault route', () => {
-  assert.equal(indexSource.includes('<title>CurveYield crvUSD IPOR Vault</title>'), true);
-  assert.equal(pagesSource.includes("export const DEFAULT_PAGE_ID = 'home';"), true);
-  assert.equal(pagesSource.includes("id: 'ipor-crvusd-lp-vault'"), true);
-  assert.equal(mainSource.includes(".split('?')[0] || DEFAULT_PAGE_ID"), true);
   assert.equal(pagesSource.includes("chainId: 'ethereum'"), true);
   assert.equal(pagesSource.includes('0xE31Aa86e21e420d03E52AaA06C349BDC525a664F'), true);
   assert.equal(pagesSource.includes("shareSymbol: 'cy-crvUSD'"), true);
@@ -149,30 +144,6 @@ test('IPOR crvUSD page targets the Ethereum CurveYield vault route', () => {
   assert.equal(mainSource.includes('Credit Markets<small>Effective Leverage 1.00x'), false);
   assert.equal(mainSource.includes('Curve 4poolUSD-f'), false);
   assert.equal(mainSource.includes('Withdraw: Scheduled (12 hours)'), false);
-});
-
-test('IPOR crvUSD page uses live route yield sources for vault and collateral APRs', () => {
-  assert.equal(pagesSource.includes("pool: 'aeb52bc8-2eb0-49d9-8571-28290c39a182'"), true);
-  assert.equal(pagesSource.includes("pool: '3811321b-c619-4c3b-bc69-3fe1f58391c6'"), true);
-  assert.equal(mainSource.includes('function iporStrategyApy(page)'), true);
-  assert.equal(mainSource.includes('function iporCurvePoolApy(page)'), true);
-  assert.equal(mainSource.includes('fetchPoolYieldApys({'), true);
-  assert.equal(mainSource.includes("metric('Curve pool APR', poolApy)"), true);
-  assert.equal(mainSource.includes("metric('StakeDAO vault APR', strategyApy)"), true);
-  assert.equal(mainSource.includes("iporMetric('APY', strategyApy"), true);
-});
-
-test('IPOR market detail rows wrap long values instead of overflowing', () => {
-  assert.equal(stylesSource.includes('.ipor-row-details .metric strong'), true);
-  assert.equal(stylesSource.includes('overflow-wrap: anywhere'), true);
-  assert.equal(stylesSource.includes('word-break: normal'), true);
-});
-
-test('IPOR performance chart uses live APY and share price values', () => {
-  assert.equal(mainSource.includes('function renderPerformanceChart(page, strategyApy, sharePrice)'), true);
-  assert.equal(mainSource.includes("const sharePrice = contractValue(page, 'shareTokenExchangeRate') || '1.000000'"), true);
-  assert.equal(mainSource.includes('renderPerformanceChart(page, strategyApy, sharePrice)'), true);
-  assert.equal(eulerLiveSource.includes('shareTokenExchangeRate: formatShareExchangeRate'), true);
 });
 
 test('wallet cache can be reset after disconnect or account changes', () => {

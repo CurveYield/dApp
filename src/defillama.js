@@ -96,43 +96,6 @@ function poolApy(pool) {
   return base + reward;
 }
 
-export function poolYieldKey(source) {
-  return `pool:${source.id || source.pool}`;
-}
-
-export function extractPoolYieldApys(pools, sources) {
-  const rows = Array.isArray(pools?.data) ? pools.data : pools;
-  if (!Array.isArray(rows)) return {};
-
-  return sources.reduce((result, source) => {
-    const row = rows.find((pool) => pool.pool === source.pool);
-    if (!row) return result;
-    const apy = poolApy(row);
-    result[poolYieldKey(source)] = {
-      apy,
-      formatted: formatApy(apy),
-      project: row.project || source.project || '',
-      chain: row.chain || source.chain || '',
-      pool: row.pool || source.pool,
-      symbol: row.symbol || source.symbol || '',
-      source: 'defillama',
-      updatedAt: Date.now(),
-    };
-    return result;
-  }, {});
-}
-
-export async function fetchPoolYieldApys({ sources, limitedFetch }) {
-  if (!sources?.length) return { sources: {}, values: {} };
-  const response = await limitedFetch(DEFILLAMA_POOLS_URL);
-  const body = await response.json();
-  const values = extractPoolYieldApys(body, sources);
-  return {
-    sources: Object.fromEntries(sources.map((source) => [poolYieldKey(source), 'defillama'])),
-    values,
-  };
-}
-
 export function extractIntrinsicApys(pools, assets) {
   const rows = Array.isArray(pools?.data) ? pools.data : pools;
   if (!Array.isArray(rows)) return {};

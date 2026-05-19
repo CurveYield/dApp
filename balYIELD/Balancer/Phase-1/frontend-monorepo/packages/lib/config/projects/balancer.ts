@@ -1,0 +1,250 @@
+import { ProjectConfig } from '@repo/lib/config/config.types'
+import { PartnerVariant, PoolDisplayType } from '@repo/lib/modules/pool/pool.types'
+import { GqlChain, GqlPoolType } from '@repo/lib/shared/services/api/generated/graphql'
+import { isProd } from '@repo/lib/config/app.config'
+
+export const ProjectConfigBalancer: ProjectConfig = {
+  projectId: 'balancer',
+  projectName: 'balYIELD',
+  projectUrl: 'https://curveyield.com',
+  projectLogo: '/images/balyield/curveyield.png',
+  supportedNetworks: [
+    GqlChain.Mainnet,
+    GqlChain.Monad,
+    GqlChain.Arbitrum,
+    GqlChain.Base,
+    GqlChain.Gnosis,
+    GqlChain.Hyperevm,
+    GqlChain.Avalanche,
+    GqlChain.Optimism,
+    GqlChain.Plasma,
+    GqlChain.Polygon,
+    GqlChain.Zkevm,
+    GqlChain.Fraxtal,
+    GqlChain.Mode,
+
+    // testnets only in dev mode
+    ...(isProd ? [] : [GqlChain.Xlayer, GqlChain.Sepolia]),
+  ],
+  variantConfig: {
+    [PartnerVariant.cow]: {
+      banners: {
+        headerSrc: '/images/partners/cow-header.svg',
+        footerSrc: '/images/partners/cow-footer.svg',
+      },
+    },
+  },
+  corePoolId: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014', // veBAL BAL8020 (Balancer 80 BAL 20 WETH) pool on Ethereum
+  defaultNetwork: GqlChain.Base,
+  ensNetwork: GqlChain.Mainnet,
+  delegateOwner: '0xba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1ba1b',
+  merklRewardsChains: [GqlChain.Mainnet, GqlChain.Arbitrum, GqlChain.Base, GqlChain.Mode],
+  options: {
+    poolDisplayType: PoolDisplayType.TokenPills,
+    hidePoolTags: ['DYNAMIC_ECLP'],
+    hidePoolTypes: [GqlPoolType.Fx, ...(isProd ? [GqlPoolType.LiquidityBootstrapping] : [])],
+    hideProtocolVersion: [],
+    showPoolName: false,
+    showMaBeets: false,
+    allowCreateWallet: true,
+    isOnSafeAppList: true,
+  },
+  links: {
+    appLinks: [],
+    ecosystemLinks: [],
+    socialLinks: [],
+    legalLinks: [
+      { label: 'Feedback' },
+      { label: 'Terms of use', href: '/terms-of-use' },
+      { label: 'Privacy policy', href: '/privacy-policy' },
+      { label: 'Cookies policy', href: '/cookies-policy' },
+      { label: '3rd party services', href: '/3rd-party-services' },
+      { label: 'Risks', href: '/risks' },
+    ],
+  },
+  footer: {
+    linkSections: [
+      {
+        title: 'Build on balYIELD',
+        links: [{ label: 'Create pool', href: '/create' }],
+      },
+      {
+        title: 'Use balYIELD protocol',
+        links: [
+          { label: 'Explore pools', href: '/balyield/pools' },
+          { label: 'Swap tokens', href: '/balyield/swap' },
+        ],
+      },
+    ],
+  },
+  cowSupportedNetworks: [
+    GqlChain.Mainnet,
+    GqlChain.Arbitrum,
+    GqlChain.Base,
+    GqlChain.Gnosis,
+    ...(isProd ? [] : [GqlChain.Sepolia]),
+  ],
+  partnerCards: [
+    {
+      backgroundImage: 'images/partners/cards/partner-xave-bg.png',
+      bgColor: 'blue.400',
+      ctaText: 'View pools',
+      ctaUrl: 'pools?poolTypes=QUANT_AMM_WEIGHTED',
+      description:
+        'Auto-rebalancing pools designed to capture additional yield from price volatility.',
+      externalLink: false,
+      iconName: 'quantamm',
+      title: 'QuantAMM',
+    },
+    {
+      backgroundImage: 'images/partners/cards/partner-cow-bg.png',
+      bgColor: 'green.900',
+      ctaText: 'View pools',
+      ctaUrl: '/pools/cow',
+      description: 'The first MEV-capturing AMM. More returns, less risk with LVR protection.',
+      iconName: 'cow',
+      title: 'CoW AMM',
+    },
+    {
+      backgroundImage: 'images/partners/cards/partner-gyro-bg.png',
+      bgColor: 'pink.600',
+      ctaText: 'View pools',
+      ctaUrl: 'pools?poolTypes=GYRO',
+      description: 'Concentrated Liquidity Pools on Balancer. Improves capital efficiency for LPs.',
+      externalLink: false,
+      iconName: 'gyro',
+      title: 'Gyroscope',
+    },
+  ],
+  promoItems: [
+    {
+      id: 0,
+      icon: 'monad',
+      label: 'Monad',
+      title: 'Balancer is live on Monad',
+      description:
+        'The High-Performance EVM Blockchain Built for Scale. 10,000 TPS, sub-second finality, low fees, and scalable decentralization.',
+      buttonText: 'View pools',
+      buttonLink: '/pools?networks=MONAD',
+      linkText: 'Learn more',
+      linkURL: 'https://www.monad.xyz/',
+      linkExternal: true,
+      bgImageActive: {
+        directory: '/images/promos/promo-banner/',
+        imgName: 'bg-active2',
+      },
+      bgImageInactive: {
+        directory: '/images/promos/promo-banner/',
+        imgName: 'bg-inactive2',
+      },
+    },
+    {
+      id: 1,
+      icon: 'reclamm',
+      label: 'reCLAMM Pools',
+      title: 'New readjusting Concentrated Liquidity Pools',
+      description:
+        'Maximize capital efficiency with reCLAMMs: Auto-readjusting concentrated liquidity—no micro-management of positions needed.',
+      buttonText: 'View pools',
+      buttonLink: '/pools?poolTypes=RECLAMM',
+      linkText: 'Learn more',
+      linkURL:
+        'https://medium.com/balancer-protocol/introducing-reclamms-self-readjusting-trustless-passive-lping-for-clamms-b5528429588e',
+      linkExternal: true,
+      bgImageActive: {
+        directory: '/images/promos/promo-banner/',
+        imgName: 'bg-active0',
+      },
+      bgImageInactive: {
+        directory: '/images/promos/promo-banner/',
+        imgName: 'bg-inactive0',
+      },
+    },
+    {
+      id: 2,
+      icon: 'boosted',
+      label: 'Boosted Pools',
+      title: '100% Boosted Pools on Balancer v3',
+      description:
+        'A simple, capital efficient strategy for LPs to get boosted yield. Partnering with leading lending protocols like Aave and Morpho.',
+      buttonText: 'View pools',
+      buttonLink: '/pools?poolTags=BOOSTED',
+      linkText: 'Learn more',
+      linkURL:
+        'https://docs.balancer.fi/concepts/explore-available-balancer-pools/boosted-pool.html',
+      linkExternal: true,
+      bgImageActive: {
+        directory: '/images/promos/promo-banner/',
+        imgName: 'bg-active1',
+      },
+      bgImageInactive: {
+        directory: '/images/promos/promo-banner/',
+        imgName: 'bg-inactive1',
+      },
+    },
+    {
+      id: 3,
+      icon: 'hook',
+      label: 'StableSurge Hook',
+      title: 'StableSurge Hook',
+      description:
+        'A dynamic directional surge swap fee in times of volatility to help defend the peg. LPs get MEV protection and increased fees.',
+      buttonText: 'View pools',
+      buttonLink: '/pools?poolHookTags=HOOKS_STABLESURGE',
+      linkText: 'Learn more',
+      linkURL: 'https://medium.com/balancer-protocol/balancers-stablesurge-hook-09d2eb20f219',
+      linkExternal: true,
+      bgImageActive: {
+        directory: '/images/promos/promo-banner/',
+        imgName: 'bg-active3',
+      },
+      bgImageInactive: {
+        directory: '/images/promos/promo-banner/',
+        imgName: 'bg-inactive3',
+      },
+    },
+    // {
+    //   id: 0,
+    //   icon: 'plasma',
+    //   label: 'Plasma Chain',
+    //   title: 'Balancer is live on Plasma Chain',
+    //   description:
+    //     'Global Reach. Real Impact. Balancer brings stable-optimized pools to the stablecoins-focused blockchain.',
+    //   buttonText: 'View pools',
+    //   buttonLink: '/pools?networks=PLASMA',
+    //   linkText: 'Learn more',
+    //   linkURL:
+    //     'https://vote.balancer.fi/#/proposal/0x382b5f20c7e03f643df9fbf7c5981f1f9aa80ae12ba60fb1b3bf87affe42cf7c',
+    //   linkExternal: true,
+    //   bgImageActive: {
+    //     directory: '/images/promos/promo-banner/',
+    //     imgName: 'bg-active2',
+    //   },
+    //   bgImageInactive: {
+    //     directory: '/images/promos/promo-banner/',
+    //     imgName: 'bg-inactive2',
+    //   },
+    // },
+    // {
+    //   id: 2,
+    //   icon: 'gyro',
+    //   label: 'Gyroscope',
+    //   title: 'Superliquidity, made simple',
+    //   description:
+    //     'Next generation Gyroscope pools are now live on Balancer v3. Manage liquidity directly within the Balancer UI.',
+    //   buttonText: 'View pools',
+    //   buttonLink: '/pools?protocolVersion=3&poolTypes=GYRO',
+    //   linkText: 'Learn more',
+    //   linkURL: 'https://www.gyro.finance/',
+    //   linkExternal: true,
+    //   bgImageActive: {
+    //     directory: '/images/promos/promo-banner/',
+    //     imgName: 'bg-active2',
+    //   },
+    //   bgImageInactive: {
+    //     directory: '/images/promos/promo-banner/',
+    //     imgName: 'bg-inactive2',
+    //   },
+    // },
+  ],
+}

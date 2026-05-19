@@ -1,0 +1,67 @@
+import { Metadata } from 'next'
+import { satoshiFont } from '@repo/lib/assets/fonts/satoshi/satoshi'
+import NextTopLoader from 'nextjs-toploader'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+import '@repo/lib/assets/css/global.css'
+import Script from 'next/script'
+import { PropsWithChildren } from 'react'
+import { Providers } from '@repo/lib/shared/components/site/providers'
+import { NavBarContainer } from '@bal/lib/components/navs/NavBarContainer'
+import { ThemeProvider } from '@bal/lib/services/chakra/ThemeProvider'
+import { BalYieldLogoType } from '@bal/lib/components/imgs/BalYieldLogoType'
+import { Footer } from '@repo/lib/shared/components/navs/Footer'
+
+export const metadata: Metadata = {
+  title: `balYIELD - DeFi Liquidity Pools`,
+  description: `Explore liquidity pools on balYIELD and earn passively in yield-bearing pools.`,
+  icons: [
+    { rel: 'icon', type: 'image/x-icon', url: '/favicon.ico' },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      url: '/favicon-light.png',
+      media: '(prefers-color-scheme: light)',
+    },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      url: '/favicon-dark.png',
+      media: '(prefers-color-scheme: dark)',
+    },
+  ],
+  openGraph: {
+    title: `balYIELD - DeFi Liquidity Pools`,
+    description: `Explore liquidity pools on balYIELD and earn passively in yield-bearing pools.`,
+    siteName: 'balYIELD',
+    type: 'website',
+  },
+  other: {
+    'base:app_id': '6a030a6b0ec9a0da335752af',
+  },
+}
+
+export default function RootLayout({ children }: PropsWithChildren) {
+  return (
+    <html lang="en">
+      <body
+        className={satoshiFont.className}
+        style={{ marginRight: '0px !important' }} // Required to prevent layout shift introduced by Rainbowkit
+      >
+        <NextTopLoader color="#7f6ae8" showSpinner={false} />
+        <ThemeProvider>
+          <Providers>
+            <NavBarContainer />
+            {children}
+            <Footer
+              logoType={<BalYieldLogoType />}
+              subTitle="balYIELD liquidity infrastructure for yield-bearing assets."
+              title="AMMs made easy"
+            />
+            <SpeedInsights />
+            <Script async src="https://w.appzi.io/w.js?token=8TY8k" />
+          </Providers>
+        </ThemeProvider>
+      </body>
+    </html>
+  )
+}

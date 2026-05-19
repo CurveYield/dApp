@@ -1,0 +1,11 @@
+import { createPublicClient, http, parseUnits } from '../apps/frontend-v3/node_modules/viem/_esm/index.js';
+import { base } from '../apps/frontend-v3/node_modules/viem/_esm/chains/index.js';
+import registry from '../apps/frontend-v3/public/data/balyield-pools.json' with { type: 'json' };
+const pool = registry.pools[0];
+const tokens = registry.tokens;
+const zero = '0x0000000000000000000000000000000000000000';
+const abi = [{inputs:[{components:[{name:'name',type:'string'},{name:'symbol',type:'string'},{components:[{name:'token',type:'address'},{name:'tokenType',type:'uint8'},{name:'rateProvider',type:'address'},{name:'paysYieldFees',type:'bool'}],name:'tokens',type:'tuple[]'},{name:'amplificationParameter',type:'uint256'},{components:[{name:'pauseManager',type:'address'},{name:'swapFeeManager',type:'address'}],name:'roleManagers',type:'tuple'},{name:'swapFeePercentage',type:'uint256'},{name:'enableDonation',type:'bool'},{name:'salt',type:'bytes32'}],name:'input',type:'tuple'}],name:'computeStableSurgePoolAddress',outputs:[{name:'',type:'address'}],stateMutability:'view',type:'function'}];
+const client = createPublicClient({ chain: base, transport: http(registry.chains.base.rpcUrl) });
+const input = { name:'balYIELD StableSurge Pool', symbol:'balYIELD-SS', tokens:[{token:tokens['base:CRV'].address,tokenType:0,rateProvider:zero,paysYieldFees:false},{token:tokens['base:cyCRV'].address,tokenType:0,rateProvider:zero,paysYieldFees:false}], amplificationParameter:50000n, roleManagers:{pauseManager:'0x5d93c48460B61107C173861c3D902B4117A1d7b6',swapFeeManager:'0x5d93c48460B61107C173861c3D902B4117A1d7b6'}, swapFeePercentage:parseUnits('0.14',18)/100n, enableDonation:false, salt:'0x0000000000000000000000000000000000000000000000000000000000000001'};
+const expected = await client.readContract({ abi, address: pool.factoryWrapper, functionName:'computeStableSurgePoolAddress', args:[input] });
+console.log(JSON.stringify({factoryWrapper:pool.factoryWrapper, expected}, null, 2));

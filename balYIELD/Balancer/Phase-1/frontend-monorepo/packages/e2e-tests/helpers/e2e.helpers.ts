@@ -1,0 +1,65 @@
+import { Page } from '@playwright/test'
+import { TokenBalancesByChain, ForkOptions } from '@repo/lib/test/utils/wagmi/fork-options'
+import { button, clickButton, forceClickButton } from './user.helpers'
+
+declare global {
+  interface Window {
+    forkOptions?: ForkOptions
+  }
+}
+
+export async function impersonate(page: Page, impersonationAddress: string) {
+  await clickButton(page, 'Dev tools button')
+  await page.getByLabel('Mock address').fill(impersonationAddress)
+  await clickButton(page, 'Impersonate button')
+  await forceClickButton(page, 'Dev tools close button')
+  await page.getByTestId('dev-tools-drawer').waitFor({ state: 'hidden' })
+  await button(page, 'Connect Wallet').first().waitFor({ state: 'hidden' })
+}
+
+/*
+  Helper to initialize anvil fork options though global interface window.forkOptions
+*/
+export async function setForkBalances(page: Page, forkOptions?: ForkOptions) {
+  const defaultForkBalances: TokenBalancesByChain = {
+    [1]: [
+      {
+        tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+        value: '100',
+      },
+      {
+        tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d', // BAL
+        value: '4000',
+      },
+    ],
+    [146]: [
+      {
+        tokenAddress: '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38', // wS
+        value: '100',
+      },
+    ],
+  }
+
+  const defaultChainId = 1
+
+  const defaultForkOptions: ForkOptions = {
+    chainId: defaultChainId,
+    forkBalances: defaultForkBalances,
+  }
+
+  await page.addInitScript(forkOptions => {
+    window.forkOptions = {
+      chainId: forkOptions.chainId || 1,
+      forkBalances: forkOptions.forkBalances,
+    }
+  }, forkOptions || defaultForkOptions)
+}
+
+export async function acceptPolicies(page: Page) {
+  await page
+    .getByRole('dialog', { name: 'Accept Balancer policies' })
+    .locator('span')
+    .first()
+    .check()
+  await page.getByRole('button', { name: 'Proceed' }).click()
+}

@@ -1,0 +1,31 @@
+{
+  "name": "e2e-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "playwright:install": "playwright install --with-deps",
+    "playwright:install:chromium": "playwright install --with-deps chromium",
+    "test:e2e:build": "start-server-and-test 'cd ../../ && pnpm start' 'http://localhost:3000|http://localhost:3001' 'pnpm exec playwright test tests/build'",
+    "test:e2e:build:ui": "pnpm exec playwright test tests/build --ui",
+    "test:e2e:dev:bal": "NEXT_PUBLIC_E2E_DEV=1 start-server-and-test 'cd ../../ &&  pnpm start --filter frontend-v3' 'http://localhost:3000' 'pnpm exec playwright test tests/dev/balancer'",
+    "test:e2e:dev:ui:bal": "NEXT_PUBLIC_E2E_DEV=1 pnpm exec playwright test tests/dev/balancer --ui",
+    "test:e2e:dev:beets": "NEXT_PUBLIC_E2E_DEV=1 start-server-and-test 'cd ../../ &&  pnpm start --filter beets-frontend-v3' 'http://localhost:3001' 'pnpm exec playwright test tests/dev/beets'",
+    "test:e2e:dev:ui:beets": "NEXT_PUBLIC_E2E_DEV=1 pnpm exec playwright test tests/dev/beets --ui",
+    "test:e2e:local": "pnpm exec playwright test tests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@balancer/sdk": "5.2.9",
+    "@playwright/test": "1.59.1",
+    "@repo/lib": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "24.12.4",
+    "beets-frontend-v3": "workspace:*",
+    "dotenv": "17.4.2",
+    "frontend-v3": "workspace:*",
+    "start-server-and-test": "3.0.2"
+  }
+}

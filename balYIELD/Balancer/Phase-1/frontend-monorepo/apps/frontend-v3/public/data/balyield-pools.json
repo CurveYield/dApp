@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-19",
+  "chains": {
+    "base": {
+      "chainId": 8453,
+      "name": "Base",
+      "rpcUrl": "https://base.drpc.org"
+    }
+  },
+  "contracts": {
+    "base": {
+      "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "router": "0x287A6A2dE40f887D8e3D505434f491772e1e04e5",
+      "vault": "0x53F019B3171960B240ccD779562e297D127e1FC9"
+    }
+  },
+  "tokens": {
+    "base:CRV": {
+      "address": "0x8Ee73c484A26e0A5df2Ee2a4960B789967dd0415",
+      "chain": "base",
+      "decimals": 18,
+      "logo": "/images/balyield/curveyield.png",
+      "name": "Curve DAO Token",
+      "symbol": "CRV"
+    },
+    "base:cyCRV": {
+      "address": "0xAf16C06AA672D35d94641F966e82d0eb4dBF8F80",
+      "chain": "base",
+      "decimals": 18,
+      "logo": "/images/balyield/curveyield-512.png",
+      "name": "CurveYield CRV",
+      "symbol": "cyCRV"
+    },
+    "base:wscyCRV": {
+      "address": "0xed535B8A195B7E241F61da0DEa41D307f6daaD3b",
+      "chain": "base",
+      "decimals": 18,
+      "logo": "/images/balyield/curveyield.png",
+      "name": "Wrapped scyCRV 18",
+      "symbol": "wscyCRV"
+    }
+  },
+  "pools": [
+    {
+      "address": "0x699D1a9f005dC6641bE27182C8e23ef2027ba801",
+      "amp": "50000",
+      "chain": "base",
+      "creatorFeeSplitter": "0x004F454F60Bf7Ec9215C17027219ec4C6Fe74c22",
+      "factoryWrapper": "0x13A46Ec4A5BDB3DEA8557bfF6e8bB02DE3BEFEf4",
+      "name": "CurveYield CRV-cyCRV-wscyCRV StableSurge",
+      "rateProvider": "0x44e1f8ae0d4f35c842f4fcfa3022fdf424d2dd94",
+      "router": "0x287A6A2dE40f887D8e3D505434f491772e1e04e5",
+      "swapFee": "0.14%",
+      "swapFeeWad": "1400000000000000",
+      "symbol": "cyCRV-StableSurge",
+      "tokens": ["base:CRV", "base:cyCRV", "base:wscyCRV"],
+      "type": "StableSurge",
+      "vault": "0x53F019B3171960B240ccD779562e297D127e1FC9",
+      "wrapper": "0xed535B8A195B7E241F61da0DEa41D307f6daaD3b"
+    }
+  ]
+}

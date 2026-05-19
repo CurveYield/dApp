@@ -135,7 +135,8 @@ test('IPOR is reachable from the brand menu but removed from the top Euler nav',
 
 test('IPOR crvUSD page targets the Ethereum CurveYield vault route', () => {
   assert.equal(indexSource.includes('<title>CurveYield crvUSD IPOR Vault</title>'), true);
-  assert.equal(pagesSource.includes("export const DEFAULT_PAGE_ID = 'ipor-crvusd-lp-vault';"), true);
+  assert.equal(pagesSource.includes("export const DEFAULT_PAGE_ID = 'home';"), true);
+  assert.equal(pagesSource.includes("id: 'ipor-crvusd-lp-vault'"), true);
   assert.equal(mainSource.includes(".split('?')[0] || DEFAULT_PAGE_ID"), true);
   assert.equal(pagesSource.includes("chainId: 'ethereum'"), true);
   assert.equal(pagesSource.includes('0xE31Aa86e21e420d03E52AaA06C349BDC525a664F'), true);

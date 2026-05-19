@@ -1,4 +1,4 @@
-﻿import { CHAINS, TOKEN_ACTIONS, TOKEN_LOGOS, getChainById } from './config/assets.js?v=2026-05-18-cycrvusd-market';
+import { CHAINS, TOKEN_ACTIONS, TOKEN_LOGOS, getChainById } from './config/assets.js?v=2026-05-18-cycrvusd-market';
 import { DEFAULT_PAGE_ID, PAGES, TOKEN_DESCRIPTIONS, getPageById } from './config/pages.js?v=2026-05-18-cycrvusd-market';
 import { combinedSupplyApy, maxRoeFromSupplyBorrowAndMultiplier, netApyFromSupplyAndBorrow } from './apyMath.js?v=2026-05-18-cycrvusd-market';
 import {
@@ -233,7 +233,7 @@ function generatedMetricFallback(page, key) {
     collateralShareTokenExchangeRate: '1.000000',
     interestFee: '0.00%',
     performanceFee: '0.00%',
-    projectedEarnings: `0 ${asset} â‰ˆ $0`,
+    projectedEarnings: `0 ${asset} ≈ $0`,
     walletBalance: `0 ${asset}`,
     irmKink: '0.00%',
     irmBaseRate: '0.00%',
@@ -1066,7 +1066,7 @@ async function refreshStatsAfterBalanceChange(pageId) {
 
 function assetIcon(symbol, tone = 'blue') {
   if (!symbol) {
-    return `<span class="asset-icon ${tone}">â€¢</span>`;
+    return `<span class="asset-icon ${tone}">•</span>`;
   }
   const logo = TOKEN_LOGOS[symbol] || PAGES.find((item) => item.asset === symbol && item.logo)?.logo;
   if (logo) {
@@ -1086,7 +1086,7 @@ function renderChainSelector(page) {
     || EULER_CHAINS[0];
   return `
     <details class="chain-select">
-      <summary class="pill chain-pill">${chainIcon(selected)}<span>${selected.label}</span><span class="chevron">âŒ„</span></summary>
+      <summary class="pill chain-pill">${chainIcon(selected)}<span>${selected.label}</span><span class="chevron">⌄</span></summary>
       <div class="chain-menu">
         ${EULER_CHAINS.map((chain) => `
           <button class="chain-option ${chain.id === selected.id ? 'selected' : ''}" data-chain-id="${chain.id}">
@@ -1106,7 +1106,7 @@ function renderWalletControl() {
     ? 'Connect wallet'
     : 'Checking wallet';
   const connected = Boolean(connectedWalletAccount);
-  return `<button class="pill address" ${connected ? 'data-wallet-change' : 'data-wallet-connect'}>${label} <span>âŒ„</span></button>`;
+  return `<button class="pill address" ${connected ? 'data-wallet-change' : 'data-wallet-connect'}>${label} <span>⌄</span></button>`;
 }
 
 function renderHeader(page) {
@@ -1139,16 +1139,16 @@ function renderHeader(page) {
       </details>
       <nav class="main-nav" aria-label="Euler pages">
         <a class="nav-item ${['portfolio', 'portfolio-action', 'portfolio-position'].includes(page.type) ? 'active' : ''}" href="#/portfolio">
-          <span class="nav-dot">â—Ž</span>
+          <span class="nav-dot">◎</span>
           <span>Portfolio</span>
         </a>
         <a class="nav-item ${page.type === 'explore' ? 'active' : ''}" href="#/explore">
-          <span class="nav-dot explore-dot">âŒ˜</span>
+          <span class="nav-dot explore-dot">⌘</span>
           <span>Explore</span>
         </a>
         <details class="nav-menu">
           <summary class="nav-item ${page.type === 'earn' ? 'active' : ''}">
-            <span class="nav-dot">â†’</span>
+            <span class="nav-dot">→</span>
             <span>Earn</span>
           </summary>
           <div class="market-menu">
@@ -1162,7 +1162,7 @@ function renderHeader(page) {
         </details>
         <details class="nav-menu">
           <summary class="nav-item ${page.type === 'market' ? 'active' : ''}">
-            <span class="nav-dot">â†‘</span>
+            <span class="nav-dot">↑</span>
             <span>Borrow</span>
             <small>Markets</small>
           </summary>
@@ -1191,7 +1191,7 @@ function renderHeader(page) {
         </details>
         ${developerMenuEnabled && !productionModeEnabled ? `<details class="nav-menu">
           <summary class="nav-item ${route.isDeveloper ? 'active' : ''}">
-            <span class="nav-dot">âš™</span>
+            <span class="nav-dot">⚙</span>
             <span>Dev</span>
             <small>Sim</small>
           </summary>
@@ -1286,7 +1286,7 @@ function renderPageTitle(page) {
   if (page.type === 'portfolio') {
     return `
       <div class="page-title">
-        <a class="back" href="#/${DEFAULT_PAGE_ID}">â€¹</a>
+        <a class="back" href="#/${DEFAULT_PAGE_ID}">‹</a>
         <div>
           <p>${page.subtitle}</p>
           <h1>${page.title}</h1>
@@ -1297,7 +1297,7 @@ function renderPageTitle(page) {
   if (page.type === 'earn') {
     return `
       <div class="page-title">
-        <a class="back" href="#/${DEFAULT_PAGE_ID}">â€¹</a>
+        <a class="back" href="#/${DEFAULT_PAGE_ID}">‹</a>
         ${assetIcon(page.asset)}
         <div>
           <p>${page.subtitle}</p>
@@ -1308,7 +1308,7 @@ function renderPageTitle(page) {
   }
   return `
     <div class="page-title">
-      <a class="back" href="#/${DEFAULT_PAGE_ID}">â€¹</a>
+      <a class="back" href="#/${DEFAULT_PAGE_ID}">‹</a>
       <span class="pair-icons">${assetIcon(page.collateral, 'gold')}${assetIcon(page.debt)}</span>
       <div>
         <p>${page.subtitle}</p>
@@ -1322,7 +1322,7 @@ function metric(label, value, accent = false) {
   return `
     <div class="metric">
       <span>${label}</span>
-      <strong class="${accent ? 'accent' : ''}">${accent ? 'âœ£ ' : ''}${value}</strong>
+      <strong class="${accent ? 'accent' : ''}">${accent ? '✣ ' : ''}${value}</strong>
     </div>
   `;
 }
@@ -1461,7 +1461,7 @@ function renderExplore(page) {
   const exploreItems = exploreFilteredItems();
   return `
     <section class="explore-hero">
-      <div class="explore-title-icon"><span class="nav-dot explore-dot">âŒ˜</span></div>
+      <div class="explore-title-icon"><span class="nav-dot explore-dot">⌘</span></div>
       <div>
         <h1>${page.title}</h1>
         <p>${page.subtitle}</p>
@@ -1469,7 +1469,7 @@ function renderExplore(page) {
     </section>
     <div class="explore-toolbar">
       <label class="explore-search">
-        <span>âŒ•</span>
+        <span>⌕</span>
         <input placeholder="Search by asset, market, curator..." aria-label="Search by asset, market, curator" data-explore-search value="${escapeAttribute(exploreSearchText)}" />
       </label>
     </div>
@@ -2165,7 +2165,7 @@ function renderMarket(page) {
         ${renderMarketTabs(page, 'pair')}
         ${renderCard('Overview', `
           <div class="metric-grid">
-            ${metric('Price', `${contractValue(page, 'price')} ${page.title} â†”`)}
+            ${metric('Price', `${contractValue(page, 'price')} ${page.title} ↔`)}
             ${metric('Max multiplier', displayMaxMultiplier(page))}
             ${metric(infoLabel('Supply APY', 'supply-apy'), totalSupplyApy)}
             ${metric(infoLabel('Borrow APY', 'borrow-apy'), contractValue(page, 'borrowApy'), true)}
@@ -2202,8 +2202,8 @@ function renderMarket(page) {
         ${renderCard('Risk parameters', `
           <div class="stat-list">
             ${metric('Liquidation bonus', '0-15%')}
-            ${metric('Supply cap', contractValue(page, 'supplyCap') || 'âˆž')}
-            ${metric('Borrow cap', contractValue(page, 'borrowCap') || 'âˆž')}
+            ${metric('Supply cap', contractValue(page, 'supplyCap') || '∞')}
+            ${metric('Borrow cap', contractValue(page, 'borrowCap') || '∞')}
             ${metric('Share token exchange rate', contractValue(page, 'shareTokenExchangeRate') || '1.00')}
             ${metric('Bad debt socialisation', 'Yes')}
             ${metric('Interest fee', contractValue(page, 'interestFee'))}
@@ -2337,7 +2337,7 @@ function renderEarn(page) {
         `)}
       </div>
       <aside class="action-panel earn-panel">
-        <div class="apy-head"><span>Supply APY <b>1h</b> â“˜</span><strong>âŒ ${totalSupplyApy}</strong></div>
+        <div class="apy-head"><span>Supply APY <b>1h</b> ⓘ</span><strong>⌁ ${totalSupplyApy}</strong></div>
         <div class="field-card">
           <div class="field-top"><span>Supply amount</span></div>
           <div class="amount-row sim-input-row">
@@ -2505,7 +2505,7 @@ function renderMarketTokenSubview(page, side, notice) {
         `)}
         ${renderCard('Risk parameters', `
           <div class="stat-list">
-            ${metric('Supply cap', contractValue(page, 'collateralSupplyCap') || 'âˆž')}
+            ${metric('Supply cap', contractValue(page, 'collateralSupplyCap') || '∞')}
             ${metric('Share token exchange rate', contractValue(page, 'collateralShareTokenExchangeRate') || '1.00')}
             ${metric('Disabled operations', 'None')}
           </div>
@@ -2576,8 +2576,8 @@ function renderDebtTokenSubview(page, notice) {
         ${renderCard('Risk parameters', `
           <div class="stat-list">
             ${metric('Liquidation bonus', '0-15%')}
-            ${metric('Supply cap', contractValue(page, 'supplyCap') || 'âˆž')}
-            ${metric('Borrow cap', contractValue(page, 'borrowCap') || 'âˆž')}
+            ${metric('Supply cap', contractValue(page, 'supplyCap') || '∞')}
+            ${metric('Borrow cap', contractValue(page, 'borrowCap') || '∞')}
             ${metric('Share token exchange rate', contractValue(page, 'shareTokenExchangeRate') || '1.00')}
             ${metric('Bad debt socialisation', 'Yes')}
             ${metric('Interest fee', contractValue(page, 'interestFee'))}
@@ -2744,7 +2744,7 @@ function renderIporMarketDetailsModal(page, strategyApy, poolApy, assets) {
   return `
     <div class="info-backdrop" data-close-info>
       <section class="info-modal ipor-details-modal ipor-full-details-modal" data-stop-close>
-        <button class="modal-close" data-close-info aria-label="Close">Ã—</button>
+        <button class="modal-close" data-close-info aria-label="Close">×</button>
         <h2>All Markets</h2>
         <div class="ipor-modal-table">
           <div class="ipor-modal-row ipor-modal-head">
@@ -2769,7 +2769,7 @@ function renderIporMarketDetailsModal(page, strategyApy, poolApy, assets) {
             <span>Vault</span><span>Underlying</span><span>Assets</span><span>Net APY</span><span>Allocation</span>
           </div>
           <div class="ipor-modal-row ipor-vault-cols ipor-modal-leaf">
-            <span><a href="${page.sourceAprUrl}" target="_blank" rel="noreferrer">${page.strategyName} â†—</a></span><span>${poolName}</span><span>${vaultAssets}</span><span>${strategyApy}</span><span><i class="ipor-dot purple"></i>99.00%</span>
+            <span><a href="${page.sourceAprUrl}" target="_blank" rel="noreferrer">${page.strategyName} ↗</a></span><span>${poolName}</span><span>${vaultAssets}</span><span>${strategyApy}</span><span><i class="ipor-dot purple"></i>99.00%</span>
           </div>
           <div class="ipor-modal-row ipor-modal-group">
             <span><strong>ERC20 Tokens</strong><small><i class="ipor-dot navy"></i>1.00%</small></span><span>${page.asset}</span><span>${idleAssets}</span><span>0.00%</span><span>1.00%</span><span>${page.idleAssetName || `Idle ${page.asset}`}</span>
@@ -2836,7 +2836,7 @@ function renderIporVault(page) {
     <div class="ipor-shell">
       <header class="ipor-topbar">
         <a class="ipor-brand" href="#/ipor-crvusd-lp-vault">
-          <span class="ipor-brand-mark">âœ¦</span>
+          <span class="ipor-brand-mark">✦</span>
           <span><strong>Fusion</strong><small>by IPOR</small></span>
         </a>
         <nav>
@@ -2850,7 +2850,7 @@ function renderIporVault(page) {
         </div>
       </header>
       <main class="ipor-container">
-        <div class="ipor-breadcrumb"><span>Fusion Vaults list</span><span>â€º</span><span>Fusion Vault details</span></div>
+        <div class="ipor-breadcrumb"><span>Fusion Vaults list</span><span>›</span><span>Fusion Vault details</span></div>
         <section class="ipor-hero">
           <div class="ipor-title-row">
             <img class="ipor-vault-logo" src="${page.logo}" alt="" />
@@ -2877,7 +2877,7 @@ function renderIporVault(page) {
             </div>
             <div class="ipor-charts">
               <section class="ipor-panel">
-                <div class="ipor-panel-head"><h2>Performance Report</h2><span>â†—</span></div>
+                <div class="ipor-panel-head"><h2>Performance Report</h2><span>↗</span></div>
                 ${renderPerformanceChart(page, strategyApy, sharePrice)}
                 <div class="ipor-chart-legend">
                   <button class="${iporPerformanceModes.has('apy') ? 'active' : ''}" data-ipor-chart="apy"><span class="${iporPerformanceModes.has('apy') ? 'checked' : ''}"></span>Strategy APR</button>
@@ -2891,7 +2891,7 @@ function renderIporVault(page) {
               </section>
             </div>
             <section class="ipor-panel ipor-markets">
-              <div class="ipor-panel-head"><h2>All Markets</h2><button data-info-kind="ipor-market-details">More details â†—</button></div>
+              <div class="ipor-panel-head"><h2>All Markets</h2><button data-info-kind="ipor-market-details">More details ↗</button></div>
               <div class="ipor-table">
                 <div class="head"><span>Route</span><span>Assets</span><span>APY</span><span>Input</span><span>Output</span><span>Allocation</span></div>
                 <div class="row strong"><span>${page.shareSymbol || page.title}<small>${page.network}</small></span><span>$${assets}</span><span>${strategyApy}</span><span>${page.asset}</span><span>${page.shareSymbol || 'Vault shares'}</span><span>100.00%</span></div>
@@ -2916,9 +2916,9 @@ function renderIporVault(page) {
               <button class="${withdrawMode ? 'active' : ''}" data-ipor-mode="withdraw">Withdraw</button>
             </div>
             <div class="ipor-action-card">
-              <h2>â†“ ${withdrawMode ? 'Withdraw' : 'Deposit'}</h2>
+              <h2>↓ ${withdrawMode ? 'Withdraw' : 'Deposit'}</h2>
               <p>${page.withdrawalLabel || 'Withdraw through vault'}</p>
-              <a href="${page.externalUrl}" target="_blank" rel="noreferrer">${page.feeLabel || 'Learn about the fees'} â†—</a>
+              <a href="${page.externalUrl}" target="_blank" rel="noreferrer">${page.feeLabel || 'Learn about the fees'} ↗</a>
               <div class="ipor-input-card">
                 <div><span>Amount</span><small>Available: ${vaultBalance}</small></div>
                 <label>
@@ -3471,5 +3471,4 @@ Promise.all([hydrateLiveMetrics(), hydrateApyState()]).then(() => {
   refreshApyOnce();
   refreshLiveMetricsOnce();
 });
-
 

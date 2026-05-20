@@ -17,6 +17,7 @@ const stylesSource = readFileSync(join(sourceDir, 'styles.css'), 'utf8');
 const cacheConfigSource = readFileSync(join(repoRoot, 'public', 'data', 'live-metrics-cache-config.json'), 'utf8');
 const refreshWorkflowSource = readFileSync(join(workflowRoot, '.github', 'workflows', 'refresh-live-metrics.yml'), 'utf8');
 const refreshScriptSource = readFileSync(join(workflowRoot, 'tools', 'refresh-live-metrics-cache.mjs'), 'utf8');
+const routeAuditSource = readFileSync(join(repoRoot, 'tools', 'route-audit-cdp.cjs'), 'utf8');
 
 test('portfolio UI does not show heuristic APY/ROE or Unknown placeholders', () => {
   assert.equal(mainSource.includes('computedEarnSupplyApy(page)'), false);
@@ -197,6 +198,10 @@ test('IPOR is reachable from the brand menu but removed from the top Euler nav',
 
 test('homepage routes to a compact IPOR vault list with requested columns and rows', () => {
   assert.equal(pagesSource.includes("id: 'fusion-vaults'"), true);
+  assert.equal(pagesSource.includes("export const DEFAULT_PAGE_ID = 'home';"), true);
+  assert.equal(mainSource.includes('function renderCurveYieldHome'), true);
+  assert.equal(mainSource.includes("if (page.type === 'home')"), true);
+  assert.equal(mainSource.includes('cy-scrvUSD Euler Vault & Markets'), true);
   assert.equal(pagesSource.includes("type: 'ipor-vault-list'"), true);
   assert.equal(mainSource.includes('<span>IPOR Vaults</span>'), true);
   assert.equal(mainSource.includes('href="#/fusion-vaults"'), true);
@@ -209,6 +214,26 @@ test('homepage routes to a compact IPOR vault list with requested columns and ro
   assert.equal(pagesSource.includes('18%'), true);
   assert.equal(pagesSource.includes('$1,229'), true);
   assert.equal(pagesSource.includes("logo: './assets/logos/cycrv.png'"), true);
+});
+
+test('homepage landing layout uses viewport-safe dynamic sizing', () => {
+  const homeSpanRule = stylesSource.match(/\.cy-home-actions span\s*\{[\s\S]*?\}/)?.[0] ?? '';
+  assert.equal(stylesSource.includes('min-height: 100svh'), true);
+  assert.equal(stylesSource.includes('width: clamp(84px, 18svh, 180px)'), true);
+  assert.equal(stylesSource.includes('font-size: clamp(34px, 8svh, 72px)'), true);
+  assert.equal(stylesSource.includes('min-height: clamp(48px, 8svh, 78px)'), true);
+  assert.equal(homeSpanRule.includes('white-space: nowrap'), false);
+});
+
+test('route audit includes screen-size samples for major page designs', () => {
+  assert.equal(routeAuditSource.includes('const VIEWPORT_SAMPLES'), true);
+  assert.equal(routeAuditSource.includes('const DESIGN_SAMPLE_ROUTES'), true);
+  for (const route of ['home', 'fusion-vaults', 'ipor-cycrv-base-vault', 'explore', 'portfolio', 'earn-scrvusd', 'market-1', 'market-1/collateral', 'portfolio-borrow-market-1-0']) {
+    assert.equal(routeAuditSource.includes(`'${route}'`), true);
+  }
+  for (const sample of ['desktop', 'short-laptop', 'mobile']) {
+    assert.equal(routeAuditSource.includes(`name: '${sample}'`), true);
+  }
 });
 
 test('CRV vault list row opens a Base IPOR-style detail page', () => {

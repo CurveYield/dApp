@@ -10,6 +10,29 @@ const height = Number(heightArg);
 const chrome = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const profile = `${process.env.TEMP || '.'}\\cy-route-audit-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const wallet = process.env.AUDIT_WALLET || '0x0000000000000000000000000000000000005825';
+const auditAllRoutes = process.env.AUDIT_ALL_ROUTES === '1';
+
+const VIEWPORT_SAMPLES = [
+  { name: 'desktop', width: 1440, height: 1100 },
+  { name: 'short-laptop', width: 1024, height: 640 },
+  { name: 'mobile', width: 390, height: 844 },
+];
+
+const DESIGN_SAMPLE_ROUTES = [
+  'home',
+  'fusion-vaults',
+  'ipor-cycrv-base-vault',
+  'explore',
+  'portfolio',
+  'earn-scrvusd',
+  'market-1',
+  'market-1/collateral',
+  'market-1/debt',
+  'portfolio-position-market-1-0',
+  'portfolio-borrow-market-1-0',
+  'arb-easy-liquidations',
+  'dev/diagnostics',
+];
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -66,6 +89,10 @@ async function loadRoutes() {
 
 async function main() {
   const routes = await loadRoutes();
+  const uniqueRoutes = [...new Set(routes)];
+  const sampledRoutes = DESIGN_SAMPLE_ROUTES.filter((route) => uniqueRoutes.includes(route));
+  const viewports = auditAllRoutes ? [{ name: 'requested', width, height }] : VIEWPORT_SAMPLES;
+  const routesByViewport = new Map(viewports.map((viewport) => [viewport.name, auditAllRoutes ? uniqueRoutes : sampledRoutes]));
   const child = spawn(chrome, [
     `--remote-debugging-port=${port}`,
     `--user-data-dir=${profile}`,
@@ -121,7 +148,6 @@ async function main() {
     await send('Page.enable');
     await send('Runtime.enable');
     await send('Network.enable');
-    await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
     await send('Page.addScriptToEvaluateOnNewDocument', {
       source: `
         (() => {
@@ -154,53 +180,76 @@ async function main() {
     await send('Page.navigate', { url: baseUrl });
     await sleep(18000);
 
-    const extraRoutesResult = await send('Runtime.evaluate', {
-      expression: `[...document.querySelectorAll('a[href^="#/portfolio-position-"],a[href^="#/portfolio-borrow-"],a[href^="#/portfolio-repay-"],a[href^="#/portfolio-supply-"],a[href^="#/portfolio-withdraw-"]')].map(a => a.getAttribute('href').replace(/^#\\//,''))`,
-      returnByValue: true,
-    }).catch(() => ({ result: { value: [] } }));
-    for (const route of extraRoutesResult.result?.value || []) routes.push(route);
-
-    const uniqueRoutes = [...new Set(routes)];
     const results = [];
-    for (const route of uniqueRoutes) {
-      await send('Runtime.evaluate', { expression: `location.hash = ${JSON.stringify(`/${route}`)}`, returnByValue: true });
-      await sleep(450);
-      const audit = await send('Runtime.evaluate', {
-        awaitPromise: true,
-        returnByValue: true,
-        expression: `
-          (() => {
-            const badTerms = ['N/A', 'Unknown', 'Pending', 'Loading...', 'undefined', 'NaN'];
-            const text = document.body ? document.body.innerText : '';
-            const visibleBadTerms = badTerms.filter((term) => text.includes(term));
-            const overflow = [...document.querySelectorAll('body *')].filter((el) => {
+    for (const viewport of viewports) {
+      await send('Emulation.setDeviceMetricsOverride', {
+        width: viewport.width,
+        height: viewport.height,
+        deviceScaleFactor: 1,
+        mobile: viewport.width <= 560,
+      });
+      const viewportRoutes = routesByViewport.get(viewport.name) || [];
+      for (const route of viewportRoutes) {
+        await send('Runtime.evaluate', { expression: `location.hash = ${JSON.stringify(`/${route}`)}`, returnByValue: true });
+        await sleep(550);
+        const audit = await send('Runtime.evaluate', {
+          awaitPromise: true,
+          returnByValue: true,
+          expression: `
+            (() => {
+              const badTerms = ['N/A', 'Unknown', 'Pending', 'Loading...', 'undefined', 'NaN'];
+              const text = document.body ? document.body.innerText : '';
+              const visibleBadTerms = badTerms.filter((term) => text.includes(term));
+              const pageHorizontalOverflow = (
+                document.documentElement.scrollWidth > window.innerWidth + 2 ||
+                document.body.scrollWidth > window.innerWidth + 2
+              );
+              const overflow = [
+                ...(pageHorizontalOverflow ? [{
+                  tag: 'document',
+                  className: '',
+                  text: 'Document is wider than the viewport',
+                }] : []),
+                ...[...document.querySelectorAll('body *')].filter((el) => {
+                if (el instanceof SVGElement || ['svg', 'path', 'text'].includes(el.tagName.toLowerCase())) return false;
               const style = getComputedStyle(el);
               const rect = el.getBoundingClientRect();
               if (style.display === 'none' || style.visibility === 'hidden' || rect.width < 2 || rect.height < 2) return false;
-              return el.scrollWidth > el.clientWidth + 2 || el.scrollHeight > el.clientHeight + 2;
-            }).slice(0, 8).map((el) => ({
+                if (style.textOverflow === 'ellipsis') return false;
+                if (['auto', 'scroll'].includes(style.overflowX)) return false;
+                const ownText = [...el.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.textContent).join('').trim();
+                return ownText && style.overflowX === 'hidden' && el.scrollWidth > el.clientWidth + 2;
+              }).slice(0, 8).map((el) => ({
               tag: el.tagName.toLowerCase(),
               className: String(el.className || '').slice(0, 80),
               text: (el.innerText || el.textContent || '').trim().slice(0, 120),
-            }));
-            return {
-              route: location.hash.replace(/^#\\//, ''),
-              title: document.querySelector('h1')?.innerText || document.title,
-              textLength: text.length,
-              loadFailed: text.includes('This site can\\u2019t be reached') || text.includes('refused to connect') || text.includes('ERR_CONNECTION_REFUSED'),
-              visibleBadTerms,
-              overflow,
-            };
-          })()
-        `,
-      });
-      results.push(audit.result.value);
+              })),
+              ];
+              return {
+                route: location.hash.replace(/^#\\//, ''),
+                title: document.querySelector('h1')?.innerText || document.title,
+                textLength: text.length,
+                loadFailed: text.includes('This site can\\u2019t be reached') || text.includes('refused to connect') || text.includes('ERR_CONNECTION_REFUSED'),
+                visibleBadTerms,
+                overflow,
+              };
+            })()
+          `,
+        });
+        results.push({
+          viewport,
+          ...audit.result.value,
+        });
+      }
     }
 
     const findings = results.filter((result) => result.loadFailed || result.visibleBadTerms.length || result.overflow.length);
     console.log(JSON.stringify({
       wallet,
-      routeCount: uniqueRoutes.length,
+      mode: auditAllRoutes ? 'all-routes' : 'design-screen-samples',
+      viewportCount: viewports.length,
+      routeCount: results.length,
+      sampledRoutes,
       findings,
       consoleErrors,
       requestFailures: requestFailures.slice(0, 20),

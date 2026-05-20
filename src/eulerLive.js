@@ -1675,7 +1675,7 @@ async function readMarketPositionSnapshot({
     collateralOraclePriceFormatted: formatUsdValue(collateralQuote),
     debtPriceFormatted: formatUsdValue(debtQuote),
     debtOraclePriceFormatted: formatUsdValue(debtQuote),
-    liquidationPriceFormatted: liquidationPrice > 0n ? formatUsdValue(liquidationPrice) : 'N/A',
+    liquidationPriceFormatted: liquidationPrice > 0n ? formatUsdValue(liquidationPrice) : '$0.00',
     ltv: `${ltvNumber.toFixed(2)}%`,
     ltvBps,
     borrowLtv: borrowLtvBps > 0n ? formatPercentFromBps(borrowLtvBps) : 'Not configured',

@@ -1,0 +1,36 @@
+name: Refresh live metrics cache
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Refresh shared live metrics cache
+        run: node tools/refresh-live-metrics-cache.mjs
+
+      - name: Commit refreshed cache
+        run: |
+          if git diff --quiet -- public/data/live-metrics-cache.json; then
+            echo "No live metrics cache changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/live-metrics-cache.json
+          git commit -m "Refresh live metrics cache"
+          git push

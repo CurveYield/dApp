@@ -1,0 +1,5 @@
+{
+  "readUrl": "https://raw.githubusercontent.com/CurveYield/dApp/main/public/data/live-metrics-cache.json",
+  "writeUrl": "",
+  "writeMethod": "PUT"
+}

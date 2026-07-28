@@ -1,12 +1,12 @@
 {
-  "updatedAt": 1785192963634,
+  "updatedAt": 1785204190106,
   "pages": {
     "market-2": {
       "collateralAssetAddress": "0x2b95a1dcc3d405535f9ed33c219ab38e8d7e0884",
       "debtAssetAddress": "0x0655977feb2f289a4ab78af67bab0d17aab84367",
       "debtTokenAddress": "0xef9e2e8ab7f26d41cbcf697bdcec73616c3b07e8",
-      "price": "0.1887",
-      "collateralPrice": "$0.2083",
+      "price": "0.1938",
+      "collateralPrice": "$0.2140",
       "debtPrice": "$1.1043",
       "totalSupply": "0.00",
       "collateralTotalSupply": "0.00",
@@ -19,7 +19,7 @@
       "netApy": "-9.99%",
       "utilization": "0.00%",
       "supplyCap": "$5.52K (0%)",
-      "collateralSupplyCap": "$3.73K (0%)",
+      "collateralSupplyCap": "$3.83K (0%)",
       "borrowCap": "$5.19K (0%)",
       "shareTokenExchangeRate": "1.012366",
       "collateralShareTokenExchangeRate": "1.000000",
@@ -29,23 +29,23 @@
       "oracleRouter": "0x44bf3f9f7019f12b367c6b8b3cd47683768b9edb",
       "unitOfAccount": "0x0000000000000000000000000000000000000348",
       "interestRateModel": "0x6a3b6480fc3a8e2ac3815a26b605b26b1abc6080",
-      "irmBaseRate": "9.99%",
-      "irmRateAtKink": "16.99%",
-      "irmMaxRate": "54.95%",
-      "irmKink": "92.00%",
+      "irmBaseRate": "0.00%",
+      "irmRateAtKink": "0.00%",
+      "irmMaxRate": "0.00%",
+      "irmKink": "0.00%",
       "hookTarget": "0x0000000000000000000000000000000000000000",
       "maxRoe": "0.00%",
       "maxLtv": "65.00%",
       "maxMultiplier": "2.86x",
       "liquidationLtv": "69.00%",
-      "updatedAt": 1785192956942
+      "updatedAt": 1785204185145
     },
     "market-1": {
       "collateralAssetAddress": "0x43e54c2e7b3e294de3a155785f52ab49d87b9922",
       "debtAssetAddress": "0x0655977feb2f289a4ab78af67bab0d17aab84367",
       "debtTokenAddress": "0x9d654e7536fcf3dbda4cdd8c79f19bf6e60e7574",
-      "price": "0.2265",
-      "collateralPrice": "$0.2501",
+      "price": "0.2315",
+      "collateralPrice": "$0.2556",
       "debtPrice": "$1.1043",
       "totalSupply": "0.00",
       "collateralTotalSupply": "0.00",
@@ -58,7 +58,7 @@
       "netApy": "-11.99%",
       "utilization": "0.00%",
       "supplyCap": "$5.52K (0%)",
-      "collateralSupplyCap": "$3.13K (0%)",
+      "collateralSupplyCap": "$3.20K (0%)",
       "borrowCap": "$5.19K (0%)",
       "shareTokenExchangeRate": "1.013548",
       "collateralShareTokenExchangeRate": "1.000000",
@@ -68,23 +68,23 @@
       "oracleRouter": "0x44bf3f9f7019f12b367c6b8b3cd47683768b9edb",
       "unitOfAccount": "0x0000000000000000000000000000000000000348",
       "interestRateModel": "0x2ef9e0818ca6923b6580c6cd817ed38cd63fc739",
-      "irmBaseRate": "11.99%",
-      "irmRateAtKink": "18.99%",
-      "irmMaxRate": "54.95%",
-      "irmKink": "92.00%",
+      "irmBaseRate": "0.00%",
+      "irmRateAtKink": "0.00%",
+      "irmMaxRate": "0.00%",
+      "irmKink": "0.00%",
       "hookTarget": "0x0000000000000000000000000000000000000000",
       "maxRoe": "0.00%",
       "maxLtv": "65.00%",
       "maxMultiplier": "2.86x",
       "liquidationLtv": "69.00%",
-      "updatedAt": 1785192956936
+      "updatedAt": 1785204185141
     },
     "market-3": {
       "collateralAssetAddress": "0x27b5739e22ad9033bcbf192059122d163b60349d",
       "debtAssetAddress": "0x0655977feb2f289a4ab78af67bab0d17aab84367",
       "debtTokenAddress": "0x3e1612617a23b81bd1a20ca05813a7cf68717fff",
-      "price": "0.3021",
-      "collateralPrice": "$0.3336",
+      "price": "0.3138",
+      "collateralPrice": "$0.3465",
       "debtPrice": "$1.1043",
       "totalSupply": "0.00",
       "collateralTotalSupply": "0.00",
@@ -97,7 +97,7 @@
       "netApy": "-9.99%",
       "utilization": "0.00%",
       "supplyCap": "$5.52K (0%)",
-      "collateralSupplyCap": "$3.34K (0%)",
+      "collateralSupplyCap": "$3.47K (0%)",
       "borrowCap": "$5.19K (0%)",
       "shareTokenExchangeRate": "1.011633",
       "collateralShareTokenExchangeRate": "1.000000",
@@ -116,14 +116,14 @@
       "maxLtv": "65.00%",
       "maxMultiplier": "2.86x",
       "liquidationLtv": "69.00%",
-      "updatedAt": 1785192958374
+      "updatedAt": 1785204186577
     },
     "market-4": {
       "collateralAssetAddress": "0x0844c227b892be5d7c837000c096f64bfc316c2d",
       "debtAssetAddress": "0x0655977feb2f289a4ab78af67bab0d17aab84367",
       "debtTokenAddress": "0x663d300c33a881b97e3230b1571f720d7a8488fd",
-      "price": "0.0777",
-      "collateralPrice": "$0.0858",
+      "price": "0.0767",
+      "collateralPrice": "$0.0847",
       "debtPrice": "$1.1043",
       "totalSupply": "0.00",
       "collateralTotalSupply": "0.00",
@@ -136,7 +136,7 @@
       "netApy": "-14.99%",
       "utilization": "0.00%",
       "supplyCap": "$5.52K (0%)",
-      "collateralSupplyCap": "$2.36K (0%)",
+      "collateralSupplyCap": "$2.33K (0%)",
       "borrowCap": "$5.19K (0%)",
       "shareTokenExchangeRate": "1.009369",
       "collateralShareTokenExchangeRate": "1.000000",
@@ -146,16 +146,16 @@
       "oracleRouter": "0x44bf3f9f7019f12b367c6b8b3cd47683768b9edb",
       "unitOfAccount": "0x0000000000000000000000000000000000000348",
       "interestRateModel": "0xa682d29c180f3be1f59a01c568a6868f2cf92af8",
-      "irmBaseRate": "0.00%",
-      "irmRateAtKink": "0.00%",
-      "irmMaxRate": "0.00%",
-      "irmKink": "0.00%",
+      "irmBaseRate": "14.99%",
+      "irmRateAtKink": "29.98%",
+      "irmMaxRate": "76.93%",
+      "irmKink": "92.00%",
       "hookTarget": "0x0000000000000000000000000000000000000000",
       "maxRoe": "0.00%",
       "maxLtv": "65.00%",
       "maxMultiplier": "2.86x",
       "liquidationLtv": "69.00%",
-      "updatedAt": 1785192958396
+      "updatedAt": 1785204186944
     },
     "market-6": {
       "collateralAssetAddress": "0xe31aa86e21e420d03e52aaa06c349bdc525a664f",
@@ -194,7 +194,7 @@
       "maxLtv": "90.00%",
       "maxMultiplier": "10.00x",
       "liquidationLtv": "92.00%",
-      "updatedAt": 1785192959986
+      "updatedAt": 1785204187202
     },
     "ipor-crvusd-lp-vault": {
       "assetAddress": "0xf939e0a03fb07f59a73314e73794be0e57ac1b4e",
@@ -246,14 +246,14 @@
       "assetUsdPrice": "$1.000000",
       "assetUsdPriceRaw": "1000000000000000000",
       "assetUsdPriceDecimals": 18,
-      "updatedAt": 1785192961284
+      "updatedAt": 1785204188989
     },
     "market-5": {
       "collateralAssetAddress": "0x0b1b34677b80f499d2f03bf335ed6a2db9f2a376",
       "debtAssetAddress": "0x0655977feb2f289a4ab78af67bab0d17aab84367",
       "debtTokenAddress": "0x5e3c272c82489bc24baba9dd74e5fc2e2869f1e5",
-      "price": "0.5765",
-      "collateralPrice": "$0.6366",
+      "price": "0.5729",
+      "collateralPrice": "$0.6327",
       "debtPrice": "$1.1043",
       "totalSupply": "0.00",
       "collateralTotalSupply": "0.00",
@@ -266,7 +266,7 @@
       "netApy": "-9.99%",
       "utilization": "0.00%",
       "supplyCap": "$5.52K (0%)",
-      "collateralSupplyCap": "$3.11K (0%)",
+      "collateralSupplyCap": "$3.09K (0%)",
       "borrowCap": "$5.19K (0%)",
       "shareTokenExchangeRate": "1.002323",
       "collateralShareTokenExchangeRate": "1.000000",
@@ -276,16 +276,16 @@
       "oracleRouter": "0x44bf3f9f7019f12b367c6b8b3cd47683768b9edb",
       "unitOfAccount": "0x0000000000000000000000000000000000000348",
       "interestRateModel": "0x0de0b5749833871b59907e47be2a97e50373a0d4",
-      "irmBaseRate": "9.99%",
-      "irmRateAtKink": "17.99%",
-      "irmMaxRate": "54.95%",
-      "irmKink": "92.00%",
+      "irmBaseRate": "0.00%",
+      "irmRateAtKink": "0.00%",
+      "irmMaxRate": "0.00%",
+      "irmKink": "0.00%",
       "hookTarget": "0x0000000000000000000000000000000000000000",
       "maxRoe": "0.00%",
       "maxLtv": "65.00%",
       "maxMultiplier": "2.86x",
       "liquidationLtv": "69.00%",
-      "updatedAt": 1785192960076
+      "updatedAt": 1785204187268
     },
     "earn-scrvusd": {
       "assetAddress": "0x0655977feb2f289a4ab78af67bab0d17aab84367",
@@ -384,7 +384,7 @@
       ],
       "supplyApy": "0.00%",
       "feeReceiver": "0x5d93c48460b61107c173861c3d902b4117a1d7b6",
-      "updatedAt": 1785192962146
+      "updatedAt": 1785204188890
     },
     "arb-market-asdcrv-crvusd": {
       "collateralAssetAddress": "0x75289388d50364c3013583d97bd70ced0e183e32",
@@ -429,16 +429,13 @@
       "totalAssets": "5,409.04",
       "totalAssetsUnit": "5,409.04 cyCRV",
       "totalLockedUnit": "5,316.56 cyCRV",
-      "totalValueManaged": "1,095.53",
-      "totalValueLocked": "1,076.80",
+      "totalValueManaged": "1,121.12",
+      "totalValueLocked": "1,101.95",
       "availableLiquidity": "5,409.04",
       "supplyApy": "0.00%",
       "performanceApy": "0.00%",
       "performanceHistory": {
         "apy": [
-          77.89703192921071,
-          17.89767151428677,
-          26.871088485569285,
           32.24595407946678,
           5.712948203910855,
           84.42000903420964,
@@ -459,12 +456,12 @@
           -0.0415256701514715,
           93.92289064138133,
           -81.9478912960403,
-          -86.79713694012115
+          -86.79713694012115,
+          88.33474606567881,
+          -90.31512497202506,
+          49.103594053613776
         ],
         "share": [
-          1.0172752774355962,
-          1.0172719511759452,
-          1.0172718849411606,
           1.0172764428432235,
           1.0172758375910262,
           1.0172767696345284,
@@ -485,17 +482,20 @@
           1.01725189425397,
           1.0172584870648405,
           1.0172597969387716,
-          1.0172547583314462
+          1.0172547583314462,
+          1.0172558004577095,
+          1.017266431893141,
+          1.0172704427960841
         ],
         "apyMin": -409.92820421888723,
         "apyMax": 172.5996027475148,
         "shareMin": 1.01725189425397,
         "shareMax": 1.0172819152444028,
         "xLabels": [
-          "07/26",
           "07/27",
           "07/27",
-          "07/27"
+          "07/27",
+          "07/28"
         ],
         "apyLabels": [
           "172.60%",
@@ -510,8 +510,8 @@
       },
       "priceOracleMiddleware": "0xb38cf54010ad4620200231746deaaa7a6694695b",
       "priceOracleAssetAddress": "0xaf16c06aa672d35d94641f966e82d0eb4dbf8f80",
-      "assetUsdPrice": "$0.202537",
-      "assetUsdPriceRaw": "202537620434300057",
+      "assetUsdPrice": "$0.207267",
+      "assetUsdPriceRaw": "207267947467564449",
       "assetUsdPriceDecimals": 18,
       "marketRows": [
         {
@@ -519,26 +519,26 @@
           "caption": "3.61%",
           "marketId": "11",
           "allocationChart": false,
-          "assets": "$39.65",
+          "assets": "$40.58",
           "assetsApy": "0.00%",
           "liabilities": "$1.00",
           "liabilitiesApy": "0.00%",
           "netApy": "0.00%",
           "assetsRaw": "195790364218858937329",
-          "assetsUsdRaw": "39654914472852614622",
+          "assetsUsdRaw": "40581066925569764388",
           "allocation": "3.61%"
         },
         {
           "label": "Euler v2",
           "caption": "3.61%",
           "marketId": "11",
-          "assets": "$39.65",
+          "assets": "$40.58",
           "assetsApy": "0.00%",
           "liabilities": "$1.00",
           "liabilitiesApy": "0.00%",
           "netApy": "0.00%",
           "assetsRaw": "195790364218858937329",
-          "assetsUsdRaw": "39654914472852614622",
+          "assetsUsdRaw": "40581066925569764388",
           "allocation": "3.61%"
         },
         {
@@ -554,13 +554,13 @@
           "label": "ERC20 Tokens",
           "caption": "96.38%",
           "remainderOfTotal": true,
-          "assets": "$1,055",
+          "assets": "$1,080",
           "assetsApy": "0.00%",
           "liabilities": "",
           "liabilitiesApy": "",
           "netApy": "0.00%",
           "assetsRaw": "5213258250219787002432",
-          "assetsUsdRaw": "1055880920708998491605",
+          "assetsUsdRaw": "1080541337141401772030",
           "allocation": "96.38%"
         }
       ],
@@ -570,10 +570,10 @@
           "ERC20 Tokens"
         ],
         "values": [
-          39.65491447285261,
-          1055.8809207089985
+          40.581066925569765,
+          1080.5413371414018
         ],
-        "maxValueLabel": "$1,095.53",
+        "maxValueLabel": "$1,121.12",
         "midValueLabel": "50%",
         "minValueLabel": "$0"
       },
@@ -581,7 +581,7 @@
       "depositsLabel": "Deposits: 5,316 cyCRV",
       "maxCapacityLabel": "Max capacity: 9,797 cyCRV",
       "capacityPercent": 54.26,
-      "updatedAt": 1785192960760
+      "updatedAt": 1785204189532
     },
     "arb-earn-crvusd": {
       "assetAddress": "0x498bf2b1e120fed3ad3d42ea2165e9b73f99c1e5",
@@ -590,7 +590,7 @@
       "totalSupply": "0.10",
       "totalAssets": "0.10",
       "availableLiquidity": "0.10",
-      "totalAssetsRaw": "101527212653227332",
+      "totalAssetsRaw": "101527339110640343",
       "assetDecimals": 18,
       "earnAllocations": [
         {
@@ -610,7 +610,7 @@
       ],
       "supplyApy": "0.00%",
       "feeReceiver": "0x5d93c48460b61107c173861c3d902b4117a1d7b6",
-      "updatedAt": 1785192963634
+      "updatedAt": 1785204190106
     }
   }
 }
